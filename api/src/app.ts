@@ -1,4 +1,7 @@
 import express from "express";
+import authRoutes from "./routes/auth-routes.js";
+
+import errorHandler from "./middlewares/error-handler.js";
 
 const app = express();
 
