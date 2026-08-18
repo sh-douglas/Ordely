@@ -10,6 +10,15 @@ class AuthController {
       next(error);
     }
   }
+
+  async signIn(req: Request, res: Response, next: NextFunction) {
+    try {
+      const employee = await AuthService.signIn(req.body);
+      return res.status(200).json(employee);
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export default new AuthController();

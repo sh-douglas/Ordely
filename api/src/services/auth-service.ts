@@ -1,11 +1,15 @@
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 import EmployeeRepository from "../repositories/employee-repository.js";
 import {
   signUpSchema,
   type SignUpInput,
+  signInSchema,
+  type SignInInput,
 } from "../validators/auth-validator.js";
 import AppError from "../errors/app-error.js";
+import { env } from "../config/env.js";
 
 class AuthService {
   async signUp(data: SignUpInput) {
@@ -38,6 +42,39 @@ class AuthService {
     };
 
     return publicEmployeeData;
+  }
+
+  async signIn(data: SignInInput) {
+    const parsedData = signInSchema.parse(data);
+    const employee = await EmployeeRepository.findByEmail(parsedData.email);
+
+    if (!employee) {
+      throw new AppError("Invalid credentials.", 401);
+    }
+
+    const isPasswordValid = await bcrypt.compare(
+      parsedData.password,
+      employee.passwordHash,
+    );
+
+    if (!isPasswordValid) {
+      throw new AppError("Invalid credentials.", 401);
+    }
+
+    const token = jwt.sign({ sub: employee.id }, env.JWT_SECRET, {
+      expiresIn: env.JWT_EXPIRES_IN,
+    });
+
+    const employeeData = {
+      id: employee.id,
+      name: employee.name,
+      email: employee.email,
+    };
+
+    return {
+      employee: employeeData,
+      token,
+    };
   }
 }
 
