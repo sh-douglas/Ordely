@@ -1,7 +1,7 @@
 services:
   database:
     image: postgres:16-alpine
-    container_name: ordely_databas
+    container_name: ordely_database
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
