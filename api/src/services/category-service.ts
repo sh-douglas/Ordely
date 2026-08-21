@@ -21,6 +21,12 @@ class CategoryService {
 
     return newCategory;
   }
+
+  async findAll() {
+    const categories = await CategoryRepository.findAll();
+
+    return categories;
+  }
 }
 
 export default new CategoryService();

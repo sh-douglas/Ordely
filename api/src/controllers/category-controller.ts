@@ -10,6 +10,16 @@ class CategoryController {
       next(error);
     }
   }
+
+  async findAll(req: Request, res: Response, next: NextFunction) {
+    try {
+      const categories = await CategoryService.findAll();
+
+      return res.status(200).json(categories);
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export default new CategoryController();

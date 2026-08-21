@@ -5,5 +5,6 @@ import CategoryController from "../controllers/category-controller.js";
 const router = Router();
 
 router.post("/", ensureAuthenticated, CategoryController.create);
+router.get("/", CategoryController.findAll);
 
 export default router;
