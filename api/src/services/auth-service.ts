@@ -76,6 +76,24 @@ class AuthService {
       token,
     };
   }
+
+  async me(id: string) {
+    const employee = await EmployeeRepository.findById(id);
+
+    if (!employee) {
+      throw new AppError("Employee not found", 404);
+    }
+
+    const publicEmployeeData = {
+      id: employee.id,
+      name: employee.name,
+      email: employee.email,
+      createdAt: employee.createdAt,
+      updatedAt: employee.updatedAt,
+    };
+
+    return publicEmployeeData;
+  }
 }
 
 export default new AuthService();
