@@ -12,6 +12,10 @@ class CategoryRepository {
   async findAll() {
     return prisma.category.findMany({ orderBy: { name: "asc" } });
   }
+
+  async findById(id: string) {
+    return prisma.category.findUnique({ where: { id } });
+  }
 }
 
 export default new CategoryRepository();
