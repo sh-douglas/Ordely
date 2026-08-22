@@ -5,5 +5,6 @@ import ensureAuthenticated from "../middlewares/ensure-authenticated.js";
 const router = Router();
 
 router.post("/", ensureAuthenticated, ProductController.create);
+router.get("/menu", ProductController.findAll);
 
 export default router;

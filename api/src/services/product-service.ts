@@ -29,6 +29,12 @@ class ProductService {
 
     return newProduct;
   }
+
+  async findAll() {
+    const products = await ProductRepository.findAll();
+
+    return products;
+  }
 }
 
 export default new ProductService();

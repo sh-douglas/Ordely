@@ -15,7 +15,7 @@ app.get("/health", (req, res) => {
   });
 });
 
-app.use("/product", productRoutes);
+app.use("/products", productRoutes);
 app.use("/category", categoryRoutes);
 app.use("/auth", authRoutes);
 
