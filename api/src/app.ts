@@ -1,6 +1,7 @@
 import express from "express";
 import authRoutes from "./routes/auth-routes.js";
 import categoryRoutes from "./routes/category-routes.js";
+import productRoutes from "./routes/product-routes.js";
 
 import errorHandler from "./middlewares/error-handler.js";
 
@@ -14,6 +15,7 @@ app.get("/health", (req, res) => {
   });
 });
 
+app.use("/product", productRoutes);
 app.use("/category", categoryRoutes);
 app.use("/auth", authRoutes);
 

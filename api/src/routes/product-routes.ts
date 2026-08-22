@@ -1,0 +1,9 @@
+import { Router } from "express";
+import ProductController from "../controllers/product-controller.js";
+import ensureAuthenticated from "../middlewares/ensure-authenticated.js";
+
+const router = Router();
+
+router.post("/", ensureAuthenticated, ProductController.create);
+
+export default router;
