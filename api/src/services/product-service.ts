@@ -30,6 +30,12 @@ class ProductService {
     return newProduct;
   }
 
+  async findAvailable() {
+    const products = await ProductRepository.findAvailable();
+
+    return products;
+  }
+
   async findAll() {
     const products = await ProductRepository.findAll();
 

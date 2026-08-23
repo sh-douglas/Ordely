@@ -12,7 +12,7 @@ class ProductRepository {
     return prisma.product.create({ data });
   }
 
-  async findAll() {
+  async findAvailable() {
     return prisma.product.findMany({
       orderBy: [
         {
@@ -27,6 +27,10 @@ class ProductRepository {
       where: { available: true },
       include: { category: true },
     });
+  }
+
+  async findAll() {
+    return prisma.product.findMany();
   }
 }
 

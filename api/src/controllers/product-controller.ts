@@ -12,6 +12,16 @@ class ProductController {
     }
   }
 
+  async findAvailable(req: Request, res: Response, next: NextFunction) {
+    try {
+      const products = await ProductService.findAvailable();
+
+      return res.status(201).json(products);
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async findAll(req: Request, res: Response, next: NextFunction) {
     try {
       const products = await ProductService.findAll();
