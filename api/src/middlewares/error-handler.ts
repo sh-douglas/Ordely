@@ -16,6 +16,7 @@ function errorHandler(
     res.status(400).json({ error: firstIssue?.message || "Invalid fields." });
     return;
   } else {
+    console.error(error);
     res.status(500).json({
       error: "An error occurred with your request. Please try again later.",
     });
