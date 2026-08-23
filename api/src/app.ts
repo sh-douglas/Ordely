@@ -4,6 +4,7 @@ import categoryRoutes from "./routes/category-routes.js";
 import productRoutes from "./routes/product-routes.js";
 
 import errorHandler from "./middlewares/error-handler.js";
+import { notFound } from "./middlewares/not-found.js";
 
 const app = express();
 
@@ -19,6 +20,7 @@ app.use("/products", productRoutes);
 app.use("/category", categoryRoutes);
 app.use("/auth", authRoutes);
 
+app.use(notFound);
 app.use(errorHandler);
 
 export default app;
