@@ -1,11 +1,11 @@
 import type { Request, Response, NextFunction } from "express";
-import AuthService from "../services/auth-service.js";
+import authService from "../services/auth-service.js";
 import AppError from "../errors/app-error.js";
 
 class AuthController {
   async signUp(req: Request, res: Response, next: NextFunction) {
     try {
-      const employee = await AuthService.signUp(req.body);
+      const employee = await authService.signUp(req.body);
       return res.status(201).json(employee);
     } catch (error) {
       next(error);
@@ -14,7 +14,7 @@ class AuthController {
 
   async signIn(req: Request, res: Response, next: NextFunction) {
     try {
-      const employee = await AuthService.signIn(req.body);
+      const employee = await authService.signIn(req.body);
       return res.status(200).json(employee);
     } catch (error) {
       next(error);
@@ -27,7 +27,7 @@ class AuthController {
         throw new AppError("Unauthorized", 401);
       }
 
-      const employee = await AuthService.me(req.employeeId);
+      const employee = await authService.me(req.employeeId);
       return res.status(200).json(employee);
     } catch (error) {
       next(error);

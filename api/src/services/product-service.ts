@@ -1,6 +1,6 @@
 import AppError from "../errors/app-error.js";
-import CategoryRepository from "../repositories/category-repository.js";
-import ProductRepository from "../repositories/product-repository.js";
+import categoryRepository from "../repositories/category-repository.js";
+import productRepository from "../repositories/product-repository.js";
 import {
   createProductSchema,
   type CreateProductInput,
@@ -10,7 +10,7 @@ class ProductService {
   async create(data: CreateProductInput) {
     const parsedData = createProductSchema.parse(data);
 
-    const existingCategory = await CategoryRepository.findById(
+    const existingCategory = await categoryRepository.findById(
       parsedData.categoryId,
     );
 
@@ -25,19 +25,19 @@ class ProductService {
       categoryId: existingCategory.id,
     };
 
-    const newProduct = await ProductRepository.create(productData);
+    const newProduct = await productRepository.create(productData);
 
     return newProduct;
   }
 
   async findAvailable() {
-    const products = await ProductRepository.findAvailable();
+    const products = await productRepository.findAvailable();
 
     return products;
   }
 
   async findAll() {
-    const products = await ProductRepository.findAll();
+    const products = await productRepository.findAll();
 
     return products;
   }

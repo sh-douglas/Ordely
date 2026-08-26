@@ -1,12 +1,12 @@
 import { Router } from "express";
-import AuthController from "../controllers/auth-controller.js";
+import authController from "../controllers/auth-controller.js";
 import ensureAuthenticated from "../middlewares/ensure-authenticated.js";
 
 const router = Router();
 
-router.post("/signin", AuthController.signIn);
-router.post("/signup", ensureAuthenticated, AuthController.signUp);
+router.post("/signin", authController.signIn);
+router.post("/signup", ensureAuthenticated, authController.signUp);
 
-router.get("/me", ensureAuthenticated, AuthController.me);
+router.get("/me", ensureAuthenticated, authController.me);
 
 export default router;

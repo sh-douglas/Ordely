@@ -1,7 +1,7 @@
 import AppError from "../errors/app-error.js";
 import { Prisma } from "../generated/prisma/client.js";
-import OrderRepository from "../repositories/order-repository.js";
-import ProductRepository from "../repositories/product-repository.js";
+import orderRepository from "../repositories/order-repository.js";
+import productRepository from "../repositories/product-repository.js";
 import {
   createOrderSchema,
   type CreateOrderInput,
@@ -14,7 +14,7 @@ class OrderService {
       return product.productId;
     });
 
-    const products = await ProductRepository.findByIds(productIds);
+    const products = await productRepository.findByIds(productIds);
 
     if (productIds.length !== products.length) {
       throw new AppError("One or more products were not found.", 404);
@@ -57,7 +57,7 @@ class OrderService {
       total,
     };
 
-    const newOrder = await OrderRepository.create(order);
+    const newOrder = await orderRepository.create(order);
 
     return newOrder;
   }

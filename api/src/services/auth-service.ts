@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
-import EmployeeRepository from "../repositories/employee-repository.js";
+import employeeRepository from "../repositories/employee-repository.js";
 import {
   signUpSchema,
   type SignUpInput,
@@ -14,7 +14,7 @@ import { env } from "../config/env.js";
 class AuthService {
   async signUp(data: SignUpInput) {
     const parsedData = signUpSchema.parse(data);
-    const registeredEmployee = await EmployeeRepository.findByEmail(
+    const registeredEmployee = await employeeRepository.findByEmail(
       parsedData.email,
     );
 
@@ -31,7 +31,7 @@ class AuthService {
       passwordHash,
     };
 
-    const employee = await EmployeeRepository.create(createEmployeeData);
+    const employee = await employeeRepository.create(createEmployeeData);
 
     const publicEmployeeData = {
       id: employee.id,
@@ -46,7 +46,7 @@ class AuthService {
 
   async signIn(data: SignInInput) {
     const parsedData = signInSchema.parse(data);
-    const employee = await EmployeeRepository.findByEmail(parsedData.email);
+    const employee = await employeeRepository.findByEmail(parsedData.email);
 
     if (!employee) {
       throw new AppError("Invalid credentials.", 401);
@@ -78,7 +78,7 @@ class AuthService {
   }
 
   async me(id: string) {
-    const employee = await EmployeeRepository.findById(id);
+    const employee = await employeeRepository.findById(id);
 
     if (!employee) {
       throw new AppError("Employee not found", 404);

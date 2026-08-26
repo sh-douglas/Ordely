@@ -1,5 +1,5 @@
 import AppError from "../errors/app-error.js";
-import CategoryRepository from "../repositories/category-repository.js";
+import categoryRepository from "../repositories/category-repository.js";
 import {
   createCategorySchema,
   type CreateCategoryInput,
@@ -9,7 +9,7 @@ class CategoryService {
   async create(data: CreateCategoryInput) {
     const parsedData = createCategorySchema.parse(data);
 
-    const existingCategory = await CategoryRepository.findByName(
+    const existingCategory = await categoryRepository.findByName(
       parsedData.name,
     );
 
@@ -17,13 +17,13 @@ class CategoryService {
       throw new AppError("This category already exists.", 409);
     }
 
-    const newCategory = await CategoryRepository.create(parsedData.name);
+    const newCategory = await categoryRepository.create(parsedData.name);
 
     return newCategory;
   }
 
   async findAll() {
-    const categories = await CategoryRepository.findAll();
+    const categories = await categoryRepository.findAll();
 
     return categories;
   }
