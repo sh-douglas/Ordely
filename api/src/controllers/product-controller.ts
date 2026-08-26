@@ -31,6 +31,23 @@ class ProductController {
       next(error);
     }
   }
+
+  async updateAvailability(
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const product = await productService.updateAvailability(
+        req.params.id,
+        req.body,
+      );
+
+      return res.status(200).json(product);
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export default new ProductController();

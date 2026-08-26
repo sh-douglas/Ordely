@@ -3,7 +3,9 @@ import categoryRepository from "../repositories/category-repository.js";
 import productRepository from "../repositories/product-repository.js";
 import {
   createProductSchema,
+  updateProductAvailableSchema,
   type CreateProductInput,
+  type UpdateProductAvailableInput,
 } from "../validators/product-validator.js";
 
 class ProductService {
@@ -40,6 +42,23 @@ class ProductService {
     const products = await productRepository.findAll();
 
     return products;
+  }
+
+  async updateAvailability(id: string, data: UpdateProductAvailableInput) {
+    const parsedData = updateProductAvailableSchema.parse(data);
+
+    const product = await productRepository.findById(id);
+
+    if (!product) {
+      throw new AppError("Product not found.", 404);
+    }
+
+    const updatedProduct = await productRepository.updateAvailability(
+      id,
+      parsedData.available,
+    );
+
+    return updatedProduct;
   }
 }
 

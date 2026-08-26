@@ -25,6 +25,16 @@ const createProductSchema = z.object({
   categoryId: z.string().uuid(),
 });
 
-type CreateProductInput = z.infer<typeof createProductSchema>;
+const updateProductAvailableSchema = z.object({
+  available: z.boolean(),
+});
 
-export { createProductSchema, type CreateProductInput };
+type CreateProductInput = z.infer<typeof createProductSchema>;
+type UpdateProductAvailableInput = z.infer<typeof updateProductAvailableSchema>;
+
+export {
+  createProductSchema,
+  type CreateProductInput,
+  updateProductAvailableSchema,
+  type UpdateProductAvailableInput,
+};

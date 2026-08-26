@@ -42,6 +42,19 @@ class ProductRepository {
       },
     });
   }
+
+  async updateAvailability(id: string, available: boolean) {
+    return prisma.product.update({
+      where: { id },
+      data: {
+        available,
+      },
+    });
+  }
+
+  async findById(id: string) {
+    return prisma.product.findUnique({ where: { id } });
+  }
 }
 
 export default new ProductRepository();
