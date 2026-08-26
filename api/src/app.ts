@@ -5,6 +5,7 @@ import helmet from "helmet";
 import authRoutes from "./routes/auth-routes.js";
 import categoryRoutes from "./routes/category-routes.js";
 import productRoutes from "./routes/product-routes.js";
+import orderRoutes from "./routes/order-routes.js";
 
 import errorHandler from "./middlewares/error-handler.js";
 import { notFound } from "./middlewares/not-found.js";
@@ -35,6 +36,7 @@ app.get("/health", (req, res) => {
   });
 });
 
+app.use("/orders", orderRoutes);
 app.use("/products", productRoutes);
 app.use("/categories", categoryRoutes);
 app.use("/auth", authRoutes);
