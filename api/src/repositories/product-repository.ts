@@ -32,6 +32,16 @@ class ProductRepository {
   async findAll() {
     return prisma.product.findMany();
   }
+
+  async findByIds(productIds: string[]) {
+    return prisma.product.findMany({
+      where: {
+        id: {
+          in: productIds,
+        },
+      },
+    });
+  }
 }
 
 export default new ProductRepository();
