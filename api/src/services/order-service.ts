@@ -61,6 +61,12 @@ class OrderService {
 
     return newOrder;
   }
+
+  async findActive() {
+    const orders = await orderRepository.findActive();
+
+    return orders;
+  }
 }
 
 export default new OrderService();

@@ -1,4 +1,4 @@
-import type { PaymentMethod } from "../generated/prisma/enums.js";
+import { OrderStatus, type PaymentMethod } from "../generated/prisma/enums.js";
 import type { Prisma } from "../generated/prisma/client.js";
 import { prisma } from "../lib/prisma.js";
 
@@ -24,6 +24,26 @@ class OrderRepository {
         total: data.total,
         orderItems: {
           create: data.items,
+        },
+      },
+    });
+  }
+
+  async findActive() {
+    return prisma.order.findMany({
+      where: {
+        status: {
+          in: [OrderStatus.PENDING, OrderStatus.IN_PROGRESS, OrderStatus.READY],
+        },
+      },
+      orderBy: {
+        createdAt: "asc",
+      },
+      include: {
+        orderItems: {
+          include: {
+            product: true,
+          },
         },
       },
     });
