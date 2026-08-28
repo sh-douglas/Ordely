@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { PaymentMethod } from "../generated/prisma/enums.js";
+import { OrderStatus } from "../generated/prisma/enums.js";
 
 const orderItemSchema = z.object({
   productId: z.uuid(),
@@ -30,6 +31,16 @@ const createOrderSchema = z.object({
     ),
 });
 
-type CreateOrderInput = z.infer<typeof createOrderSchema>;
+const updateOrderStatusSchema = z.object({
+  status: z.enum(OrderStatus),
+});
 
-export { createOrderSchema, type CreateOrderInput };
+type CreateOrderInput = z.infer<typeof createOrderSchema>;
+type UpdateOrderStatusInput = z.infer<typeof updateOrderStatusSchema>;
+
+export {
+  createOrderSchema,
+  type CreateOrderInput,
+  updateOrderStatusSchema,
+  type UpdateOrderStatusInput,
+};

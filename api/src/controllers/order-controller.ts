@@ -14,12 +14,23 @@ class OrderController {
     return res.status(200).json(orders);
   }
 
-  async findById(req: Request<{ id: number }>, res: Response) {
+  async findById(req: Request<{ id: string }>, res: Response) {
     const parsedId = Number(req.params.id);
 
     const order = await orderService.findById(parsedId);
 
     return res.status(200).json(order);
+  }
+
+  async updateOrderStatus(req: Request<{ id: string }>, res: Response) {
+    const parsedId = Number(req.params.id);
+
+    const updatedOrder = await orderService.updateOrderStatus(
+      parsedId,
+      req.body,
+    );
+
+    return res.status(200).json(updatedOrder);
   }
 }
 

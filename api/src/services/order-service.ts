@@ -1,10 +1,12 @@
 import AppError from "../errors/app-error.js";
-import { Prisma } from "../generated/prisma/client.js";
+import { OrderStatus, Prisma } from "../generated/prisma/client.js";
 import orderRepository from "../repositories/order-repository.js";
 import productRepository from "../repositories/product-repository.js";
 import {
   createOrderSchema,
+  updateOrderStatusSchema,
   type CreateOrderInput,
+  type UpdateOrderStatusInput,
 } from "../validators/order-validator.js";
 
 class OrderService {
@@ -72,6 +74,35 @@ class OrderService {
     const order = await orderRepository.findById(id);
 
     return order;
+  }
+
+  async updateOrderStatus(id: number, data: UpdateOrderStatusInput) {
+    const parsedData = updateOrderStatusSchema.parse(data);
+
+    const order = await orderRepository.findById(id);
+
+    if (!order) {
+      throw new AppError("Order not found", 404);
+    }
+
+    const allowedStatus: Record<OrderStatus, OrderStatus[]> = {
+      [OrderStatus.PENDING]: [OrderStatus.IN_PROGRESS, OrderStatus.CANCELED],
+      [OrderStatus.IN_PROGRESS]: [OrderStatus.READY, OrderStatus.CANCELED],
+      [OrderStatus.READY]: [OrderStatus.COMPLETED],
+      [OrderStatus.COMPLETED]: [],
+      [OrderStatus.CANCELED]: [],
+    };
+
+    if (!allowedStatus[order.status].includes(parsedData.status)) {
+      throw new AppError("Invalid order status transition.", 409);
+    }
+
+    const updatedOrder = await orderRepository.updateStatus(
+      id,
+      parsedData.status,
+    );
+
+    return updatedOrder;
   }
 }
 

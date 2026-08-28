@@ -14,3 +14,5 @@ class CategoryController {
     return res.status(200).json(categories);
   }
 }
+
+export default new CategoryController();
