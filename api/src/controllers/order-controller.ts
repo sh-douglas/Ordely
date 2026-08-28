@@ -20,6 +20,21 @@ class OrderController {
       next(error);
     }
   }
+
+  async findById(
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const parsedId = Number(req.params.id);
+      const order = await orderService.findById(parsedId);
+
+      return res.status(200).json(order);
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export default new OrderController();

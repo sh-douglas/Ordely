@@ -48,6 +48,12 @@ class OrderRepository {
       },
     });
   }
+
+  async findById(id: number) {
+    return prisma.order.findUnique({
+      where: { id },
+    });
+  }
 }
 
 export default new OrderRepository();

@@ -67,6 +67,12 @@ class OrderService {
 
     return orders;
   }
+
+  async findById(id: number) {
+    const order = await orderRepository.findById(id);
+
+    return order;
+  }
 }
 
 export default new OrderService();
