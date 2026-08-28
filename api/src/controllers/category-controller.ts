@@ -1,25 +1,16 @@
-import type { Request, Response, NextFunction } from "express";
+import type { Request, Response } from "express";
 import categoryService from "../services/category-service.js";
 
 class CategoryController {
-  async create(req: Request, res: Response, next: NextFunction) {
-    try {
-      const category = await categoryService.create(req.body);
-      return res.status(201).json(category);
-    } catch (error) {
-      next(error);
-    }
+  async create(req: Request, res: Response) {
+    const category = await categoryService.create(req.body);
+
+    return res.status(201).json(category);
   }
 
-  async findAll(req: Request, res: Response, next: NextFunction) {
-    try {
-      const categories = await categoryService.findAll();
+  async findAll(req: Request, res: Response) {
+    const categories = await categoryService.findAll();
 
-      return res.status(200).json(categories);
-    } catch (error) {
-      next(error);
-    }
+    return res.status(200).json(categories);
   }
 }
-
-export default new CategoryController();

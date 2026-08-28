@@ -1,52 +1,32 @@
-import type { Request, Response, NextFunction } from "express";
+import type { Request, Response } from "express";
 import productService from "../services/product-service.js";
 
 class ProductController {
-  async create(req: Request, res: Response, next: NextFunction) {
-    try {
-      const product = await productService.create(req.body);
+  async create(req: Request, res: Response) {
+    const product = await productService.create(req.body);
 
-      return res.status(201).json(product);
-    } catch (error) {
-      next(error);
-    }
+    return res.status(201).json(product);
   }
 
-  async findAvailable(req: Request, res: Response, next: NextFunction) {
-    try {
-      const products = await productService.findAvailable();
+  async findAvailable(req: Request, res: Response) {
+    const products = await productService.findAvailable();
 
-      return res.status(201).json(products);
-    } catch (error) {
-      next(error);
-    }
+    return res.status(201).json(products);
   }
 
-  async findAll(req: Request, res: Response, next: NextFunction) {
-    try {
-      const products = await productService.findAll();
+  async findAll(req: Request, res: Response) {
+    const products = await productService.findAll();
 
-      return res.status(201).json(products);
-    } catch (error) {
-      next(error);
-    }
+    return res.status(201).json(products);
   }
 
-  async updateAvailability(
-    req: Request<{ id: string }>,
-    res: Response,
-    next: NextFunction,
-  ) {
-    try {
-      const product = await productService.updateAvailability(
-        req.params.id,
-        req.body,
-      );
+  async updateAvailability(req: Request<{ id: string }>, res: Response) {
+    const product = await productService.updateAvailability(
+      req.params.id,
+      req.body,
+    );
 
-      return res.status(200).json(product);
-    } catch (error) {
-      next(error);
-    }
+    return res.status(200).json(product);
   }
 }
 
