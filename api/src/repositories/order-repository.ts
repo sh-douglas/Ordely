@@ -10,6 +10,7 @@ interface OrderItemData {
 
 interface OrderCreateData {
   customerName: string;
+  customerPhone: string;
   paymentMethod: PaymentMethod;
   items: OrderItemData[];
   total: Prisma.Decimal;
@@ -20,6 +21,7 @@ class OrderRepository {
     return prisma.order.create({
       data: {
         customerName: data.customerName,
+        customerPhone: data.customerPhone,
         paymentMethod: data.paymentMethod,
         total: data.total,
         orderItems: {

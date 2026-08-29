@@ -29,6 +29,12 @@ const createOrderSchema = z.object({
         path: [],
       },
     ),
+  customerPhone: z
+    .string()
+    .trim()
+    .regex(/^\d{11}$/, {
+      message: "The customer phone field must contain only numbers.",
+    }),
 });
 
 const updateOrderStatusSchema = z.object({

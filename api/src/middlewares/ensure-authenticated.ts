@@ -11,6 +11,7 @@ export default async function ensureAuthenticated(
 ) {
   const header = req.headers.authorization;
   let decoded;
+
   if (!header) {
     next(new AppError("Unauthorized.", 401));
     return;
@@ -18,12 +19,7 @@ export default async function ensureAuthenticated(
 
   const [scheme, token] = header.split(" ");
 
-  if (scheme !== "Bearer") {
-    next(new AppError("Unauthorized.", 401));
-    return;
-  }
-
-  if (!token) {
+  if (scheme !== "Bearer" || !token) {
     next(new AppError("Unauthorized.", 401));
     return;
   }
