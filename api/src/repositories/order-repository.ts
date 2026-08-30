@@ -63,6 +63,19 @@ class OrderRepository {
       data: { status },
     });
   }
+
+  async findByTrackingCode(trackingCode: string) {
+    return prisma.order.findUnique({
+      where: { trackingCode },
+      include: {
+        orderItems: {
+          include: {
+            product: true,
+          },
+        },
+      },
+    });
+  }
 }
 
 export default new OrderRepository();

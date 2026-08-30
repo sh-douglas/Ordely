@@ -32,6 +32,19 @@ class OrderController {
 
     return res.status(200).json(updatedOrder);
   }
+
+  async findByTrackingCode(
+    req: Request<{ trackingCode: string }>,
+    res: Response,
+  ) {
+    const order = await orderService.findByTrackingCode(
+      req.params.trackingCode,
+    );
+
+    return res.status(200).json({
+      order,
+    });
+  }
 }
 
 export default new OrderController();

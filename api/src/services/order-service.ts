@@ -54,6 +54,7 @@ class OrderService {
 
     const order = {
       customerName: parsedData.customerName,
+      customerPhone: parsedData.customerPhone,
       paymentMethod: parsedData.paymentMethod,
       items: orderItems,
       total,
@@ -103,6 +104,35 @@ class OrderService {
     );
 
     return updatedOrder;
+  }
+
+  async findByTrackingCode(trackingCode: string) {
+    const order = await orderRepository.findByTrackingCode(trackingCode);
+
+    if (!order) {
+      throw new AppError("Order not found.", 404);
+    }
+
+    const publicOrderData = {
+      id: order.id,
+      customerName: order.customerName,
+      status: order.status,
+      paymentMethod: order.paymentMethod,
+      total: order.total,
+      createdAt: order.createdAt,
+      orderItems: order.orderItems.map((item) => {
+        return {
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+          product: {
+            name: item.product.name,
+            price: item.product.price,
+          },
+        };
+      }),
+    };
+
+    return publicOrderData;
   }
 }
 
