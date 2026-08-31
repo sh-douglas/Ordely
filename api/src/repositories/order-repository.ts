@@ -76,6 +76,26 @@ class OrderRepository {
       },
     });
   }
+
+  async findHistory() {
+    return prisma.order.findMany({
+      where: {
+        status: {
+          in: [OrderStatus.COMPLETED, OrderStatus.CANCELED],
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      include: {
+        orderItems: {
+          include: {
+            product: true,
+          },
+        },
+      },
+    });
+  }
 }
 
 export default new OrderRepository();

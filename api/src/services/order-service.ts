@@ -134,6 +134,12 @@ class OrderService {
 
     return publicOrderData;
   }
+
+  async findHistory() {
+    const orders = await orderRepository.findHistory();
+
+    return orders;
+  }
 }
 
 export default new OrderService();

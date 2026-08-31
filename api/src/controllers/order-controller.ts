@@ -41,9 +41,13 @@ class OrderController {
       req.params.trackingCode,
     );
 
-    return res.status(200).json({
-      order,
-    });
+    return res.status(200).json(order);
+  }
+
+  async findHistory(req: Request, res: Response) {
+    const orders = await orderService.findHistory();
+
+    return res.status(200).json(orders);
   }
 }
 
