@@ -19,7 +19,7 @@ class AuthService {
     );
 
     if (registeredEmployee) {
-      throw new AppError("E-mail already in use", 409);
+      throw new AppError("E-mail already in use.", 409);
     }
 
     const salt = await bcrypt.genSalt(12);
@@ -81,7 +81,7 @@ class AuthService {
     const employee = await employeeRepository.findById(id);
 
     if (!employee) {
-      throw new AppError("Employee not found", 404);
+      throw new AppError("Employee not found.", 404);
     }
 
     const publicEmployeeData = {

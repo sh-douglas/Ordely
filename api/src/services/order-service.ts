@@ -83,7 +83,7 @@ class OrderService {
     const order = await orderRepository.findById(id);
 
     if (!order) {
-      throw new AppError("Order not found", 404);
+      throw new AppError("Order not found.", 404);
     }
 
     const allowedStatus: Record<OrderStatus, OrderStatus[]> = {
