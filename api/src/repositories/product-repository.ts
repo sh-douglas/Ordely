@@ -5,6 +5,7 @@ interface ProductCreateData {
   description?: string;
   price: string;
   categoryId: string;
+  imageUrl?: string;
 }
 
 class ProductRepository {

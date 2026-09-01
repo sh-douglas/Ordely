@@ -23,6 +23,7 @@ const createProductSchema = z.object({
       message: "Price must be greater than zero.",
     }),
   categoryId: z.string().uuid(),
+  imageUrl: z.string().trim().url().optional(),
 });
 
 const updateProductAvailableSchema = z.object({

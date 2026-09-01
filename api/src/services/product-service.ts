@@ -25,6 +25,7 @@ class ProductService {
       ...(parsedData.description && { description: parsedData.description }),
       price: parsedData.price,
       categoryId: existingCategory.id,
+      ...(parsedData.imageUrl && { imageUrl: parsedData.imageUrl }),
     };
 
     const newProduct = await productRepository.create(productData);
