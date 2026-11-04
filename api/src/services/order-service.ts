@@ -74,6 +74,10 @@ class OrderService {
   async findById(id: number) {
     const order = await orderRepository.findById(id);
 
+    if (!order) {
+      throw new AppError("Order not found.", 404);
+    }
+
     return order;
   }
 

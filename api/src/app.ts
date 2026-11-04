@@ -21,7 +21,7 @@ const corsOptions: CorsOptions = {
     if (!origin || origin === allowedOrigin) {
       callback(null, true);
     } else {
-      callback(new AppError("URL is not allowed", 401));
+      callback(new AppError("Origin is not allowed.", 403));
     }
   },
 };

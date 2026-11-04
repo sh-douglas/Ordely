@@ -1,6 +1,8 @@
 import type { Request, Response } from "express";
 import orderService from "../services/order-service.js";
 
+import { orderIdSchema, trackingCodeSchema } from "../validators/params-validator.js";
+
 class OrderController {
   async create(req: Request, res: Response) {
     const order = await orderService.create(req.body);
@@ -15,7 +17,7 @@ class OrderController {
   }
 
   async findById(req: Request<{ id: string }>, res: Response) {
-    const parsedId = Number(req.params.id);
+    const parsedId = orderIdSchema.parse(req.params.id);
 
     const order = await orderService.findById(parsedId);
 
@@ -23,7 +25,7 @@ class OrderController {
   }
 
   async updateOrderStatus(req: Request<{ id: string }>, res: Response) {
-    const parsedId = Number(req.params.id);
+    const parsedId = orderIdSchema.parse(req.params.id);
 
     const updatedOrder = await orderService.updateOrderStatus(
       parsedId,
@@ -38,7 +40,7 @@ class OrderController {
     res: Response,
   ) {
     const order = await orderService.findByTrackingCode(
-      req.params.trackingCode,
+      trackingCodeSchema.parse(req.params.trackingCode),
     );
 
     return res.status(200).json(order);
