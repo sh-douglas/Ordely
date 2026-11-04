@@ -8,6 +8,10 @@ router.get("/", ensureAuthenticated, orderController.findActive);
 router.get("/history", ensureAuthenticated, orderController.findHistory);
 router.get("/:id", ensureAuthenticated, orderController.findById);
 router.get("/track/:trackingCode", orderController.findByTrackingCode);
-router.patch("/:id/status", orderController.updateOrderStatus);
+router.patch(
+  "/:id/status",
+  ensureAuthenticated,
+  orderController.updateOrderStatus,
+);
 
 export default router;
