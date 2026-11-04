@@ -11,14 +11,15 @@ import errorHandler from "./middlewares/error-handler.js";
 import { notFound } from "./middlewares/not-found.js";
 import { env } from "./config/env.js";
 import AppError from "./errors/app-error.js";
+import { allowedOrigins } from "./config/cors.js";
 
 const app = express();
 
+const origins = allowedOrigins(env.CORS_ORIGIN);
+
 const corsOptions: CorsOptions = {
   origin: (origin, callback) => {
-    const allowedOrigin = env.CORS_ORIGIN;
-
-    if (!origin || origin === allowedOrigin) {
+    if (!origin || origins.has(origin)) {
       callback(null, true);
     } else {
       callback(new AppError("Origin is not allowed.", 403));

@@ -73,7 +73,7 @@ CORS_ORIGIN=http://localhost:5173
 - `DATABASE_URL`: deve repetir o usuário, senha, porta e banco do `.env` da raiz. Use `localhost` porque a API roda fora do Docker. O arquivo da API não herda automaticamente as variáveis do arquivo da raiz.
 - `JWT_SECRET`: gere um segredo, copie o resultado e substitua o valor acima. A aplicação exige pelo menos 16 caracteres; o comando abaixo gera 64 caracteres hexadecimais.
 - `JWT_EXPIRES_IN`: aceita `15m`, `30m`, `1h`, `2h`, `12h`, `1d` ou `7d`.
-- `CORS_ORIGIN`: origem exata do frontend autorizado, com protocolo e porta, sem caminho ou barra final. `http://localhost:5173` é apenas um exemplo para um frontend local. Requisições sem cabeçalho `Origin`, como curl, também são aceitas.
+- `CORS_ORIGIN`: origem exata do frontend autorizado, com protocolo e porta, sem caminho ou barra final. `http://localhost:5173` é apenas um exemplo para um frontend local. Para origens locais, `localhost` e `127.0.0.1` são aceitos como aliases, mantendo o mesmo protocolo e porta. Outros hosts exigem correspondência exata. Requisições sem cabeçalho `Origin`, como curl, também são aceitas.
 
 Gere o segredo JWT:
 
@@ -245,4 +245,4 @@ Antes de iniciar, ajuste `VITE_API_URL` em `web/.env` para a porta definida por 
 
 A interface inclui cardápio, sacola, checkout para retirada, acompanhamento, login e painel com pedidos, histórico, produtos, categorias e cadastro de funcionários. O primeiro funcionário continua sendo criado conforme a seção de autenticação deste guia. O banco começa vazio: categorias e produtos cadastrados no painel passam a aparecer no cardápio.
 
-Consulte [web/README.md](web/README.md) para os contratos, limites e instruções de build. Na pasta `web`, `npm test` executa os 19 testes do frontend e `npm run build` valida os tipos e gera a versão de produção. São suítes separadas dos 50 testes da API.
+Consulte [web/README.md](web/README.md) para os contratos, limites e instruções de build. Na pasta `web`, `npm test` executa os 19 testes do frontend e `npm run build` valida os tipos e gera a versão de produção. São suítes separadas dos 57 testes da API.

@@ -205,3 +205,19 @@ test('missing tables remain a server error, not a missing API resource', async (
   products.findAvailable.mock.mockImplementation(async () => { throw new Prisma.PrismaClientKnownRequestError('table missing', { code: 'P2021', clientVersion: '7.10.1' }); });
   await expectError('/products/menu', {}, 500, 'An error occurred with your request. Please try again later.');
 });
+
+test('CORS returns the matching origin for localhost and its loopback alias', async () => {
+  for (const origin of ['http://localhost:5173', 'http://127.0.0.1:5173']) {
+    const result = await fetch(base + '/health', { headers: { Origin: origin } });
+    assert.equal(result.status, 200);
+    assert.equal(result.headers.get('access-control-allow-origin'), origin);
+  }
+});
+test('CORS accepts the login preflight from the loopback alias', async () => {
+  const result = await fetch(base + '/auth/signin', { method: 'OPTIONS', headers: { Origin: 'http://127.0.0.1:5173', 'Access-Control-Request-Method': 'POST', 'Access-Control-Request-Headers': 'content-type' } });
+  assert.equal(result.status, 204);
+  assert.equal(result.headers.get('access-control-allow-origin'), 'http://127.0.0.1:5173');
+  assert.match(result.headers.get('access-control-allow-methods'), /POST/);
+  assert.match(result.headers.get('access-control-allow-headers'), /content-type/i);
+});
+test('CORS still blocks a loopback origin on another port', () => expectError('/health', { headers: { Origin: 'http://127.0.0.1:5174' } }, 403, 'Origin is not allowed.'));

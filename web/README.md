@@ -28,7 +28,7 @@ Em `api/.env`, configure:
 CORS_ORIGIN=http://localhost:5173
 ```
 
-Abra **http://localhost:5173**, inclusive se o Vite imprimir `127.0.0.1`: as origens são diferentes para CORS. A porta 5173 é fixa; se estiver ocupada, encerre o outro processo. Reinicie o Vite depois de editar `.env` e a API depois de alterar seu CORS.
+Abra **http://localhost:5173**. A API também aceita o alias `http://127.0.0.1:5173` quando `CORS_ORIGIN` aponta para localhost, preservando protocolo e porta. Outros domínios continuam exigindo correspondência exata. A porta 5173 é fixa; se estiver ocupada, encerre o outro processo. Reinicie o Vite depois de editar `.env` e a API depois de alterar seu CORS.
 
 As variáveis `VITE_*` são públicas e incorporadas ao build. Nunca coloque JWT_SECRET, senha do banco ou outras credenciais nelas.
 
