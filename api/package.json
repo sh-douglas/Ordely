@@ -1,7 +1,7 @@
 {
   "name": "api",
   "version": "1.0.0",
-  "description": "Ordely é uma plataforma de gestão de pedidos que ajuda estabelecimentos a organizar o atendimento, acompanhar pedidos em tempo real e avisar clientes quando estiverem prontos para retirada.",
+  "description": "Ordely \u00e9 uma plataforma de gest\u00e3o de pedidos que ajuda estabelecimentos a organizar o atendimento, acompanhar pedidos em tempo real e avisar clientes quando estiverem prontos para retirada.",
   "keywords": [
     "Node.js",
     "TypeScript",
@@ -33,15 +33,15 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
-    "@types/node": "^26.2.0",
+    "@types/node": "^24.0.0",
     "@types/pg": "^8.21.0",
-    "prisma": "^7.9.1",
+    "prisma": "7.10.1",
     "tsx": "^4.23.12",
     "typescript": "^7.0.2"
   },
   "dependencies": {
-    "@prisma/adapter-pg": "^7.9.1",
-    "@prisma/client": "^7.9.1",
+    "@prisma/adapter-pg": "7.10.1",
+    "@prisma/client": "7.10.1",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
@@ -49,12 +49,16 @@
     "helmet": "^8.3.0",
     "jsonwebtoken": "^9.0.3",
     "pg": "^8.23.0",
-    "zod": "^4.4.3"
+    "zod": "^4.6.7"
   },
   "allowScripts": {
-    "@prisma/engines@7.9.1": true,
+    "@prisma/engines@7.10.1": true,
     "bcrypt@6.0.0": true,
     "esbuild@0.28.2": true,
-    "prisma@7.9.1": true
+    "prisma@7.10.1": true
+  },
+  "engines": {
+    "node": "^24.0.0",
+    "npm": ">=11.0.0"
   }
 }
