@@ -127,7 +127,7 @@ Na pasta `api`:
 npm run dev
 ```
 
-Esse comando gera o cliente Prisma e inicia a API com reinicialização automática após alterações. A mensagem esperada é `App is running on 5000 port` quando `PORT=5000`.
+Esse comando gera o cliente Prisma e inicia a API com reinicialização automática após alterações. A mensagem esperada é `App is running on port 5000.` quando `PORT=5000`.
 
 Em outro terminal:
 
@@ -180,6 +180,7 @@ Na pasta `api`:
 | Comando | Uso |
 | --- | --- |
 | `npm run dev` | Iniciar desenvolvimento com watch. |
+| `npm test` | Executar testes HTTP de regressão com repositórios simulados, sem acessar o banco local. |
 | `npm run typecheck` | Gerar cliente e verificar tipos sem emitir JavaScript. |
 | `npm run build` / `npm start` | Compilar / executar o build. |
 | `npm run db:generate` | Regenerar cliente após mudanças no schema ou atualização do Prisma. |
@@ -193,6 +194,12 @@ Na pasta `api`:
 As versões de `prisma`, `@prisma/client` e `@prisma/adapter-pg` estão alinhadas. Ao atualizá-las, mantenha esse alinhamento, gere novamente o cliente, valide os tipos e revise o resultado do audit. Versione também o lockfile. Evite `npm audit fix --force` sem revisar as mudanças de compatibilidade.
 
 Consulte a documentação do [Prisma Client](https://www.prisma.io/docs/orm/v7/prisma-client/setup-and-configuration/generating-prisma-client) e dos [comandos de migração](https://www.prisma.io/docs/orm/v7/reference/prisma-cli-reference).
+
+### Respostas HTTP
+
+Consultas e atualizações retornam `200`; criações retornam `201`. Entradas inválidas retornam `400`, autenticação ausente ou inválida retorna `401`, origem CORS não permitida retorna `403`, recursos inexistentes retornam `404` e conflitos retornam `409`. Corpos acima do limite retornam `413`; charset ou codificação não suportados retornam `415`. Falhas inesperadas retornam `500`, sem expor detalhes internos.
+
+A alteração de status em `PATCH /orders/:id/status` exige `Authorization: Bearer SEU_TOKEN`, assim como as demais operações de funcionários. IDs de pedidos devem ser inteiros positivos de até 2147483647; IDs de produtos e códigos de acompanhamento devem ser UUIDs válidos.
 
 ## Parar e reiniciar
 
@@ -219,5 +226,5 @@ docker compose up -d --wait
 | `Cannot find type definition file for 'node'` | Use Node 24 e execute `npm ci` dentro de `api`, sem omitir devDependencies. No editor, selecione o TypeScript instalado no workspace e reinicie o servidor de TypeScript se o erro persistir. |
 | Não encontra `generated/prisma/client.js` ou tipos Prisma | Execute `npm run db:generate`; `dev`, `typecheck` e `build` também fazem essa etapa. Não crie os arquivos gerados manualmente. |
 | Tabelas inexistentes | Execute `npm run db:migrate` apontando para o banco correto. |
-| `URL is not allowed` | Ajuste `CORS_ORIGIN` para a origem exata enviada pelo frontend e reinicie a API. |
+| `Origin is not allowed.` | Ajuste `CORS_ORIGIN` para a origem exata enviada pelo frontend e reinicie a API. |
 | Login não funciona em banco novo | Crie o primeiro funcionário conforme a seção de autenticação; não existe seed automático. |

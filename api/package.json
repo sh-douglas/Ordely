@@ -32,7 +32,8 @@
     "db:check": "tsx src/lib/check-connection.ts",
     "typecheck": "npm run db:generate && tsc --noEmit",
     "build": "npm run db:generate && tsc",
-    "start": "node dist/server.js"
+    "start": "node dist/server.js",
+    "test": "npm run db:generate && node --import tsx --test tests/*.test.mjs"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
