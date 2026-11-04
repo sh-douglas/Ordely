@@ -26,7 +26,13 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "db:check": "tsx src/lib/check-connection.ts"
+    "predev": "npm run db:generate",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate deploy",
+    "db:check": "tsx src/lib/check-connection.ts",
+    "typecheck": "npm run db:generate && tsc --noEmit",
+    "build": "npm run db:generate && tsc",
+    "start": "node dist/server.js"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
