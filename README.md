@@ -2,7 +2,7 @@
 
 Ordely é uma plataforma de gestão de pedidos que ajuda estabelecimentos a organizar o atendimento, acompanhar pedidos em tempo real e avisar clientes quando estiverem prontos para retirada.
 
-O repositório contém uma API REST com Node.js, TypeScript, Express e Prisma, além do PostgreSQL em Docker. Neste fluxo, **o container executa somente o banco; a API roda na sua máquina**. Não há frontend neste repositório.
+O repositório contém uma API REST com Node.js, TypeScript, Express e Prisma, além do PostgreSQL em Docker. Neste fluxo, **o container executa somente o banco; a API roda na sua máquina**. O frontend React fica em `web` e roda separadamente com Vite. Veja a seção de frontend ao final deste guia.
 
 ## 1. Pré-requisitos
 
@@ -228,3 +228,21 @@ docker compose up -d --wait
 | Tabelas inexistentes | Execute `npm run db:migrate` apontando para o banco correto. |
 | `Origin is not allowed.` | Ajuste `CORS_ORIGIN` para a origem exata enviada pelo frontend e reinicie a API. |
 | Login não funciona em banco novo | Crie o primeiro funcionário conforme a seção de autenticação; não existe seed automático. |
+
+
+## Frontend React (`web`)
+
+Com banco e API em execução, abra outro terminal na raiz:
+
+```sh
+cd web
+cp .env.example .env
+npm ci
+npm run dev
+```
+
+Antes de iniciar, ajuste `VITE_API_URL` em `web/.env` para a porta definida por `PORT` em `api/.env` (ex.: `http://localhost:3000` ou `http://localhost:5000`). Use `CORS_ORIGIN=http://localhost:5173` na API e acesse **http://localhost:5173**. Reinicie cada processo após alterar seu arquivo de ambiente. Não sobrescreva um `.env` já configurado.
+
+A interface inclui cardápio, sacola, checkout para retirada, acompanhamento, login e painel com pedidos, histórico, produtos, categorias e cadastro de funcionários. O primeiro funcionário continua sendo criado conforme a seção de autenticação deste guia. O banco começa vazio: categorias e produtos cadastrados no painel passam a aparecer no cardápio.
+
+Consulte [web/README.md](web/README.md) para os contratos, limites e instruções de build. Na pasta `web`, `npm test` executa os 19 testes do frontend e `npm run build` valida os tipos e gera a versão de produção. São suítes separadas dos 50 testes da API.
