@@ -17,7 +17,7 @@ class AuthController {
 
   async me(req: Request, res: Response) {
     if (!req.employeeId) {
-      throw new AppError("Unauthorized", 401);
+      throw new AppError("Unauthorized.", 401);
     }
 
     const employee = await authService.me(req.employeeId);

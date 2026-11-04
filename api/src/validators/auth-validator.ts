@@ -5,7 +5,7 @@ const signUpSchema = z
     name: z
       .string()
       .trim()
-      .min(3, "The name field must contain at least 3 characters"),
+      .min(3, "The name field must contain at least 3 characters."),
     email: z.string().trim().email("The email field must be valid."),
     password: z
       .string()
@@ -15,7 +15,7 @@ const signUpSchema = z
       .min(6, "The confirm password field must contain at least 6 characters."),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: "The passwords must be the same.",
+    message: "Passwords must match.",
     path: ["confirmPassword"],
   });
 

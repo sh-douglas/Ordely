@@ -17,7 +17,7 @@ const createProductSchema = z.object({
     .min(1, "Price cannot be empty.")
     .regex(/^(0|[1-9]\d{0,7})(\.\d{1,2})?$/, {
       message:
-        "Must be a positive decimal number with up to 8 integer digits and 2 decimal places.",
+        "Price must be a positive decimal number with up to 8 integer digits and 2 decimal places.",
     })
     .refine((val) => parseFloat(val) > 0, {
       message: "Price must be greater than zero.",

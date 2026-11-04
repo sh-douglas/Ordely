@@ -19,7 +19,7 @@ class AuthService {
     );
 
     if (registeredEmployee) {
-      throw new AppError("E-mail already in use.", 409);
+      throw new AppError("Email already in use.", 409);
     }
 
     const salt = await bcrypt.genSalt(12);

@@ -33,7 +33,7 @@ const createOrderSchema = z.object({
     .string()
     .trim()
     .regex(/^\d{11}$/, {
-      message: "The customer phone field must contain only numbers.",
+      message: "The customer phone field must contain exactly 11 digits.",
     }),
 });
 

@@ -6,7 +6,7 @@ async function startServer() {
   try {
     await prisma.$connect();
     app.listen(env.PORT, () => {
-      console.log(`App is running on ${env.PORT} port`);
+      console.log(`App is running on port ${env.PORT}.`);
     });
   } catch (error) {
     console.error(error);
