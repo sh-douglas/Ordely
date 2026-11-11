@@ -37,17 +37,19 @@ beforeEach(() => {
   setToken(null);
   vi.spyOn(api, "get").mockImplementation(async (path) => ({
     data:
-      path === "/categories"
-        ? [category]
-        : path === "/products/menu" || path === "/products/inventory"
-          ? [product]
-          : path === "/orders"
-            ? [order]
-            : path === "/orders/history"
-              ? []
-              : path.startsWith("/orders/track/")
-                ? order
-                : { id, name: "Funcionário", email: "a@example.com" },
+      path === "/auth/employees"
+        ? [{ id, name: "Funcionário", email: "a@example.com" }]
+        : path === "/categories"
+          ? [category]
+          : path === "/products/menu" || path === "/products/inventory"
+            ? [product]
+            : path === "/orders"
+              ? [order]
+              : path === "/orders/history"
+                ? []
+                : path.startsWith("/orders/track/")
+                  ? order
+                  : { id, name: "Funcionário", email: "a@example.com" },
   }));
   vi.spyOn(api, "post").mockResolvedValue({
     data: { id: 1, trackingCode: id },
@@ -255,4 +257,52 @@ it("informa falha da API sem mostrar produtos fictícios", async () => {
   wrap(<Menu />);
   expect(await screen.findByRole("alert")).toBeInTheDocument();
   expect(screen.queryByText("Sanduíche da casa")).not.toBeInTheDocument();
+});
+
+it("edita preço do produto e permite limpar campos opcionais", async () => {
+  vi.spyOn(window, "scrollTo").mockImplementation(() => {});
+  const user = userEvent.setup();
+  wrap(<Inventory />);
+  await user.click(
+    await screen.findByRole("button", { name: "Editar Sanduíche da casa" }),
+  );
+  expect(screen.getByLabelText("Nome")).toHaveValue(product.name);
+  await user.clear(screen.getByLabelText("Preço (R$)"));
+  await user.type(screen.getByLabelText("Preço (R$)"), "29,90");
+  await user.click(screen.getByRole("button", { name: "Salvar produto" }));
+  await waitFor(() =>
+    expect(api.patch).toHaveBeenCalledWith(`/products/${id}`, {
+      name: product.name,
+      price: "29.90",
+      categoryId: category.id,
+      description: null,
+      imageUrl: null,
+    }),
+  );
+  expect(
+    await screen.findByText("Produto atualizado com sucesso."),
+  ).toBeInTheDocument();
+});
+it("edita uma categoria existente", async () => {
+  const user = userEvent.setup();
+  wrap(<Categories />);
+  await user.click(
+    await screen.findByRole("button", { name: "Editar Lanches" }),
+  );
+  await user.clear(screen.getByLabelText("Nome da categoria"));
+  await user.type(
+    screen.getByLabelText("Nome da categoria"),
+    "Lanches especiais",
+  );
+  await user.click(screen.getByRole("button", { name: "Salvar categoria" }));
+  await waitFor(() =>
+    expect(api.patch).toHaveBeenCalledWith(`/categories/${category.id}`, {
+      name: "Lanches especiais",
+    }),
+  );
+});
+it("lista funcionários cadastrados", async () => {
+  wrap(<Team />);
+  expect(await screen.findByText("a@example.com")).toBeInTheDocument();
+  expect(screen.getByText("Funcionário")).toBeInTheDocument();
 });

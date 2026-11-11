@@ -7,6 +7,8 @@ const router = Router();
 router.post("/signin", authController.signIn);
 router.post("/signup", ensureAuthenticated, authController.signUp);
 
+router.get("/employees", ensureAuthenticated, authController.findAll);
+
 router.get("/me", ensureAuthenticated, authController.me);
 
 export default router;

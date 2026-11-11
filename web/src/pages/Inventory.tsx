@@ -20,6 +20,7 @@ import {
 export default function Inventory() {
   const products = useResource<Product[]>("/products/inventory");
   const categories = useResource<Category[]>("/categories");
+  const [editing, setEditing] = useState<Product | null>(null);
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const action = useAction();
@@ -29,12 +30,23 @@ export default function Inventory() {
     const form = e.currentTarget;
     const values = Object.fromEntries(new FormData(form));
     void creation.run(async () => {
-      await api.post("/products", productSchema.parse(values));
+      const data = productSchema.parse(values);
+      if (editing) {
+        await api.patch(`/products/${editing.id}`, {
+          ...data,
+          description: data.description ?? null,
+          imageUrl: data.imageUrl ?? null,
+        });
+      } else {
+        await api.post("/products", data);
+      }
       form.reset();
       setOpen(false);
       products.refresh();
       action.setSuccess(
-        "Produto cadastrado. Ele já está disponível no cardápio.",
+        editing
+          ? "Produto atualizado com sucesso."
+          : "Produto cadastrado. Ele já está disponível no cardápio.",
       );
     });
   }
@@ -49,9 +61,17 @@ export default function Inventory() {
         eyebrow="CARDÁPIO"
         title="Seus produtos"
         action={
-          <button className="btn primary" onClick={() => setOpen((v) => !v)}>
+          <button
+            className="btn primary"
+            disabled={creation.busy}
+            onClick={() => {
+              setEditing(null);
+              creation.setError("");
+              setOpen((v) => !v);
+            }}
+          >
             {open ? <X size={17} /> : <Plus size={17} />}{" "}
-            {open ? "Fechar cadastro" : "Novo produto"}
+            {open ? "Cancelar" : "Novo produto"}
           </button>
         }
       >
@@ -59,21 +79,37 @@ export default function Inventory() {
       </Heading>
       {open && (
         <section className="panel mb-6">
-          <h2 className="mb-5">Cadastrar produto</h2>
-          <form onSubmit={create} className="form-grid">
+          <h2 className="mb-5">
+            {editing ? "Editar produto" : "Cadastrar produto"}
+          </h2>
+          <form
+            key={editing?.id ?? "new"}
+            onSubmit={create}
+            className="form-grid"
+          >
             <Field label="Nome">
-              <input name="name" maxLength={100} required />
+              <input
+                name="name"
+                defaultValue={editing?.name ?? ""}
+                maxLength={100}
+                required
+              />
             </Field>
             <Field label="Preço (R$)">
               <input
                 name="price"
+                defaultValue={editing?.price ?? ""}
                 inputMode="decimal"
                 placeholder="24,90"
                 required
               />
             </Field>
             <Field label="Categoria">
-              <select name="categoryId" required defaultValue="">
+              <select
+                name="categoryId"
+                required
+                defaultValue={editing?.categoryId ?? ""}
+              >
                 <option value="" disabled>
                   Selecione uma categoria
                 </option>
@@ -85,11 +121,21 @@ export default function Inventory() {
               </select>
             </Field>
             <Field label="URL da imagem (opcional)">
-              <input name="imageUrl" type="url" placeholder="https://…" />
+              <input
+                name="imageUrl"
+                defaultValue={editing?.imageUrl ?? ""}
+                type="url"
+                placeholder="https://…"
+              />
             </Field>
             <div className="full">
               <Field label="Descrição (opcional)">
-                <textarea name="description" maxLength={150} rows={2} />
+                <textarea
+                  name="description"
+                  defaultValue={editing?.description ?? ""}
+                  maxLength={150}
+                  rows={2}
+                />
               </Field>
             </div>
             <div className="full">
@@ -143,6 +189,20 @@ export default function Inventory() {
                 </p>
               </div>
               <strong>{money(p.price)}</strong>
+              <button
+                className="btn secondary"
+                disabled={creation.busy}
+                aria-label={`Editar ${p.name}`}
+                onClick={() => {
+                  setEditing(p);
+                  setOpen(true);
+                  creation.setError("");
+                  action.setSuccess("");
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }}
+              >
+                Editar
+              </button>
               <button
                 className={`availability ${p.available ? "on" : ""}`}
                 role="switch"

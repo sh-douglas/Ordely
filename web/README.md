@@ -42,11 +42,11 @@ As variáveis `VITE_*` são públicas e incorporadas ao build. Nunca coloque JWT
 | `/entrar` | Login dos funcionários. |
 | `/painel` | Pedidos ativos, filtros e transições de status; atualização a cada 10 segundos. |
 | `/painel/historico` | Pedidos concluídos e cancelados. |
-| `/painel/produtos` | Cadastro de produtos e alteração de disponibilidade. |
-| `/painel/categorias` | Consulta e cadastro de categorias. |
-| `/painel/equipe` | Cadastro de funcionários, apenas com sessão autenticada. |
+| `/painel/produtos` | Cadastro, edição de preço/dados e alteração de disponibilidade. |
+| `/painel/categorias` | Consulta, cadastro e edição de categorias. |
+| `/painel/equipe` | Listagem e cadastro de funcionários, apenas com sessão autenticada. |
 
-O primeiro funcionário precisa existir no banco, conforme o procedimento do README da raiz. A API não oferece cadastro inicial público, recuperação de senha, listagem de funcionários, edição geral ou exclusão de produtos; a interface respeita esses limites.
+O primeiro funcionário precisa existir no banco, conforme o procedimento do README da raiz. A API não oferece cadastro inicial público, recuperação de senha ou exclusão de produtos; a interface respeita esses limites.
 
 ## Comportamento e contratos
 
@@ -70,9 +70,9 @@ npm run build
 npm audit
 ```
 
-A suíte contém 19 testes com Vitest, Testing Library e jsdom. Confere normalização de dados, valores monetários, contratos Zod, sacola/checkout, login, proteção do painel, pedidos, disponibilidade, cadastros, rastreamento e falhas de conexão. Axios é simulado nesses testes; eles não acessam o banco.
+A suíte contém 25 testes com Vitest, Testing Library e jsdom. Confere normalização de dados, valores monetários, contratos Zod, sacola/checkout, login, proteção do painel, pedidos, disponibilidade, cadastros, rastreamento e falhas de conexão. Axios é simulado nesses testes; eles não acessam o banco.
 
-Além da suíte, foi validado no navegador um fluxo real com API e PostgreSQL descartáveis: cardápio → criação de pedido → acompanhamento → login → preparo → pronto → retirada → histórico. Os dados e o banco de teste foram removidos. Layouts público e administrativo foram inspecionados em desktop e viewport reduzida.
+Em uma validação anterior, registrada neste guia, foi validado no navegador um fluxo real com API e PostgreSQL descartáveis: cardápio → criação de pedido → acompanhamento → login → preparo → pronto → retirada → histórico. Os dados e o banco de teste foram removidos. Layouts público e administrativo foram inspecionados em desktop e viewport reduzida.
 
 `npm run format` formata os arquivos do frontend. `npm run build` produz `dist`. Para inspecionar o build, use `npm run preview`; autorize a origem da porta de preview no CORS da API durante esse teste.
 
@@ -86,6 +86,26 @@ Além da suíte, foi validado no navegador um fluxo real com API e PostgreSQL de
 - `src/pages`: telas públicas e administrativas.
 - `src/styles.css`: Tailwind e estilos da identidade visual responsiva.
 
-## Hospedagem futura
+## Hospedagem
 
 O frontend é uma SPA. Configure fallback de todas as rotas para `index.html`, defina `VITE_API_URL` antes do build e autorize a origem HTTPS do frontend no CORS do backend. Esta implementação não publica, não executa push e não provisiona hospedagem.
+
+### Publicação na Vercel
+
+Configure o projeto da Vercel com **Root Directory: `web`**, preset Vite,
+comando `npm run build` e saída `dist`. Defina `VITE_API_URL` com a URL pública
+da API. O arquivo `web/vercel.json` encaminha as rotas do React para
+`index.html`, permitindo abrir ou atualizar `/acompanhar/:code` e `/painel`
+diretamente no navegador. A configuração só entra em vigor após novo deploy.
+
+A edição de produtos e categorias e a lista da equipe dependem também da
+publicação da API atualizada. Não há migração de banco para estas alterações.
+As novas rotas autenticadas são `GET /auth/employees`, `PATCH /products/:id`
+e `PATCH /categories/:id`. Na edição de produto, `description` e `imageUrl`
+aceitam `null` para remover os valores; campos omitidos são preservados.
+
+### Página 404 e relatório de testes
+
+Endereços não reconhecidos exibem uma página própria com cabeçalho e rodapé, links para cardápio, acompanhamento e login. A rota curinga também cobre caminhos desconhecidos dentro de `/painel`. Como a aplicação é uma SPA, essa tela não muda o status HTTP do documento servido pela Vercel (o fallback pode responder 200). Erros da API continuam usando os seus próprios status HTTP.
+
+A validação desta atualização foi automatizada, sem banco real nem teste no domínio de produção. Consulte o [relatório de alterações e testes](../docs/alteracoes-e-testes-2026-11-11.md) e o [PDF](../output/pdf/ordely-alteracoes-e-testes-2026-11-11.pdf).

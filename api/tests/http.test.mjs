@@ -40,9 +40,9 @@ after(async () => {
 });
 beforeEach(() => {
   const fixtures = [
-    [employees, { findById: employee, findByEmail: employee, create: employee }],
-    [categories, { findById: category, findByName: null, findAll: [category], create: category }],
-    [products, { findById: product, findByIds: [product], findAvailable: [product], findAll: [product], create: product, updateAvailability: { ...product, available: false } }],
+    [employees, { findAll: [employee], findById: employee, findByEmail: employee, create: employee }],
+    [categories, { findById: category, findByName: null, findAll: [category], create: category, update: category }],
+    [products, { findById: product, findByIds: [product], findAvailable: [product], findAll: [product], create: product, update: product, updateAvailability: { ...product, available: false } }],
     [orders, { findById: order, findByTrackingCode: order, findActive: [order], findHistory: [], create: order, updateStatus: { ...order, status: 'IN_PROGRESS' } }],
   ];
   for (const [repository, methods] of fixtures) {
@@ -95,7 +95,7 @@ for (const [path, options, expected] of [
 }
 
 for (const [method, path] of [
-  ['POST', '/auth/signup'], ['GET', '/auth/me'], ['POST', '/categories'],
+  ['GET', '/auth/employees'], ['PATCH', `/products/${productId}`], ['PATCH', `/categories/${categoryId}`], ['POST', '/auth/signup'], ['GET', '/auth/me'], ['POST', '/categories'],
   ['POST', '/products'], ['GET', '/products/inventory'], ['PATCH', `/products/${productId}/availability`],
   ['GET', '/orders'], ['GET', '/orders/history'], ['GET', '/orders/1'], ['PATCH', '/orders/1/status'],
 ]) {
@@ -221,3 +221,30 @@ test('CORS accepts the login preflight from the loopback alias', async () => {
   assert.match(result.headers.get('access-control-allow-headers'), /content-type/i);
 });
 test('CORS still blocks a loopback origin on another port', () => expectError('/health', { headers: { Origin: 'http://127.0.0.1:5174' } }, 403, 'Origin is not allowed.'));
+
+test('employee list exposes only public fields', async () => {
+  const result = await request('/auth/employees', { auth: true });
+  assert.equal(result.status, 200);
+  assert.deepEqual(result.body, [{ id: employeeId, name: employee.name, email: employee.email }]);
+});
+test('product edits persist price and clear optional fields', async () => {
+  const body = { price: '25.90', description: null, imageUrl: null, categoryId };
+  assert.equal((await request(`/products/${productId}`, { method: 'PATCH', auth: true, body })).status, 200);
+  assert.deepEqual(products.update.mock.calls[0].arguments, [productId, body]);
+  for (const price of ['-1', '0', '1.234']) {
+    assert.equal((await request(`/products/${productId}`, { method: 'PATCH', auth: true, body: { price } })).status, 400);
+  }
+  categories.findById.mock.mockImplementation(async () => null);
+  await expectError(`/products/${productId}`, { method: 'PATCH', auth: true, body }, 404, 'Category not found.');
+  products.findById.mock.mockImplementation(async () => null);
+  await expectError(`/products/${productId}`, { method: 'PATCH', auth: true, body }, 404, 'Product not found.');
+});
+test('category edits allow same name but reject duplicates and missing categories', async () => {
+  categories.findByName.mock.mockImplementation(async () => category);
+  assert.equal((await request(`/categories/${categoryId}`, { method: 'PATCH', auth: true, body: { name: 'Meals' } })).status, 200);
+  assert.deepEqual(categories.update.mock.calls[0].arguments, [categoryId, 'Meals']);
+  categories.findByName.mock.mockImplementation(async () => ({ ...category, id: productId }));
+  await expectError(`/categories/${categoryId}`, { method: 'PATCH', auth: true, body: { name: 'Meals' } }, 409, 'This category already exists.');
+  categories.findById.mock.mockImplementation(async () => null);
+  await expectError(`/categories/${categoryId}`, { method: 'PATCH', auth: true, body: { name: 'Meals' } }, 404, 'Category not found.');
+});

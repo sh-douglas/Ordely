@@ -7,6 +7,19 @@ interface EmployeeCreateData {
 }
 
 class EmployeeRepository {
+  async findAll() {
+    return prisma.employee.findMany({
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+      orderBy: [{ name: "asc" }, { id: "asc" }],
+    });
+  }
+
   async create(data: EmployeeCreateData) {
     return prisma.employee.create({ data });
   }

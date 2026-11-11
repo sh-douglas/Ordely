@@ -4,6 +4,17 @@ import productService from "../services/product-service.js";
 import { productIdSchema } from "../validators/params-validator.js";
 
 class ProductController {
+  async update(req: Request<{ id: string }>, res: Response) {
+    return res
+      .status(200)
+      .json(
+        await productService.update(
+          productIdSchema.parse(req.params.id),
+          req.body,
+        ),
+      );
+  }
+
   async create(req: Request, res: Response) {
     const product = await productService.create(req.body);
 

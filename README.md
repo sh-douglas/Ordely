@@ -243,6 +243,47 @@ npm run dev
 
 Antes de iniciar, ajuste `VITE_API_URL` em `web/.env` para a porta definida por `PORT` em `api/.env` (ex.: `http://localhost:3000` ou `http://localhost:5000`). Use `CORS_ORIGIN=http://localhost:5173` na API e acesse **http://localhost:5173**. Reinicie cada processo após alterar seu arquivo de ambiente. Não sobrescreva um `.env` já configurado.
 
-A interface inclui cardápio, sacola, checkout para retirada, acompanhamento, login e painel com pedidos, histórico, produtos, categorias e cadastro de funcionários. O primeiro funcionário continua sendo criado conforme a seção de autenticação deste guia. O banco começa vazio: categorias e produtos cadastrados no painel passam a aparecer no cardápio.
+A interface inclui cardápio, sacola, checkout para retirada, acompanhamento, login e painel com pedidos, histórico, cadastro e edição de produtos e categorias, listagem e cadastro de funcionários, além de página 404 personalizada. O primeiro funcionário continua sendo criado conforme a seção de autenticação deste guia. O banco começa vazio: categorias e produtos cadastrados no painel passam a aparecer no cardápio.
 
-Consulte [web/README.md](web/README.md) para os contratos, limites e instruções de build. Na pasta `web`, `npm test` executa os 19 testes do frontend e `npm run build` valida os tipos e gera a versão de produção. São suítes separadas dos 57 testes da API.
+Consulte [web/README.md](web/README.md) para os contratos, limites e instruções de build. Na pasta `web`, `npm test` executa os 25 testes do frontend e `npm run build` valida os tipos e gera a versão de produção. São suítes separadas dos 63 testes da API.
+
+## Atualização de 11/11/2026
+
+| Área | Alteração | Como usar |
+| --- | --- | --- |
+| Acompanhamento | Configuração de fallback da Vercel para abrir links diretos do React. | Após o deploy, colar `/acompanhar/:code` no navegador carrega a tela de acompanhamento. |
+| Equipe | Lista de funcionários com nome e e-mail; atualização após cadastro. | Acessar **Equipe** no painel autenticado. |
+| Produtos | Edição de nome, preço, categoria, descrição e imagem. | Em **Produtos**, clicar em **Editar**, alterar os campos e **Salvar produto**. Campos opcionais vazios removem os valores anteriores. |
+| Categorias | Edição de nome, com bloqueio de duplicidade. | Em **Categorias**, clicar em **Editar** e **Salvar categoria**. |
+| Página 404 | Página personalizada para endereços desconhecidos. | Oferece retorno ao cardápio, acompanhamento e acesso da equipe. |
+
+### Novos contratos da API
+
+Todas estas rotas exigem `Authorization: Bearer SEU_TOKEN`:
+
+| Método e rota | Entrada / resposta |
+| --- | --- |
+| `GET /auth/employees` | Lista ordenada por nome e ID; retorna ID, nome, e-mail e datas. Nunca retorna hash de senha. |
+| `PATCH /products/:id` | Aceita um ou mais campos: `name`, `price`, `categoryId`, `description`, `imageUrl`. Preço é string decimal positiva com até duas casas. `null` remove descrição/imagem; campos omitidos são preservados. |
+| `PATCH /categories/:id` | Recebe `{ "name": "Bebidas" }`; rejeita nome de outra categoria com 409. |
+
+IDs devem ser UUIDs. As atualizações validam a existência dos registros e da categoria escolhida. Mantém-se o modelo atual de acesso: funcionários autenticados podem operar estas rotas, sem novos níveis de permissão.
+
+### Publicação desta atualização
+
+1. Publicar a API atualizada. Estas alterações não exigem migração de banco.
+2. Na Vercel, usar **Root Directory `web`**, preset Vite, build `npm run build` e saída `dist`.
+3. Configurar `VITE_API_URL` com a URL pública da API e `CORS_ORIGIN` na API com a origem do frontend.
+4. Publicar novamente o frontend para aplicar `web/vercel.json` e as novas telas.
+5. Executar o roteiro de conferência em produção descrito no relatório abaixo.
+
+O fallback entrega `index.html` para as rotas do React. A página 404 é uma tela da aplicação: o documento pode responder HTTP 200 na hospedagem estática. As respostas 404 da API continuam independentes.
+
+### Testes e documentação
+
+Validação em 11/11/2026: **25 testes do frontend + 63 testes da API = 88 aprovados**, com builds de ambos os projetos aprovados. O frontend usa Axios simulado; a API usa repositórios simulados. Não houve acesso ao banco real nem validação no domínio publicado nesta rodada.
+
+Para reproduzir, execute `npm test` e `npm run build` em cada pasta (`web` e `api`). Os testes HTTP da API precisam abrir uma porta local em `127.0.0.1`.
+
+- [Relatório de alterações e testes pela visão do usuário](docs/alteracoes-e-testes-2026-11-11.md)
+- [Relatório em PDF](output/pdf/ordely-alteracoes-e-testes-2026-11-11.pdf)

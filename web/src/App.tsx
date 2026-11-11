@@ -9,9 +9,10 @@ import {
   ArrowUpRight,
   ShoppingBag,
 } from "lucide-react";
-import { Brand, Empty } from "./components/ui";
+import { Brand } from "./components/ui";
 import { Protected, useAuth } from "./lib/auth";
 import Menu from "./pages/Menu";
+import NotFound from "./pages/NotFound";
 import Tracking from "./pages/Tracking";
 import Login from "./pages/Login";
 import Orders from "./pages/Orders";
@@ -127,16 +128,9 @@ export default function App() {
         <Route path="categorias" element={<Categories />} />
         <Route path="equipe" element={<Team />} />
       </Route>
-      <Route
-        path="*"
-        element={
-          <Empty title="Esta página não foi encontrada">
-            <Link to="/" className="text-button">
-              Voltar ao cardápio
-            </Link>
-          </Empty>
-        }
-      />
+      <Route element={<PublicLayout />}>
+        <Route path="*" element={<NotFound />} />
+      </Route>
     </Routes>
   );
 }

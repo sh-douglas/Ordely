@@ -12,6 +12,17 @@ import AppError from "../errors/app-error.js";
 import { env } from "../config/env.js";
 
 class AuthService {
+  async findAll() {
+    const employees = await employeeRepository.findAll();
+    return employees.map(({ id, name, email, createdAt, updatedAt }) => ({
+      id,
+      name,
+      email,
+      createdAt,
+      updatedAt,
+    }));
+  }
+
   async signUp(data: SignUpInput) {
     const parsedData = signUpSchema.parse(data);
     const registeredEmployee = await employeeRepository.findByEmail(

@@ -3,6 +3,10 @@ import authService from "../services/auth-service.js";
 import AppError from "../errors/app-error.js";
 
 class AuthController {
+  async findAll(req: Request, res: Response) {
+    return res.status(200).json(await authService.findAll());
+  }
+
   async signUp(req: Request, res: Response) {
     const employee = await authService.signUp(req.body);
 

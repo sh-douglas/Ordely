@@ -3,12 +3,28 @@ import categoryRepository from "../repositories/category-repository.js";
 import productRepository from "../repositories/product-repository.js";
 import {
   createProductSchema,
+  updateProductSchema,
+  type UpdateProductInput,
   updateProductAvailableSchema,
   type CreateProductInput,
   type UpdateProductAvailableInput,
 } from "../validators/product-validator.js";
 
 class ProductService {
+  async update(id: string, data: UpdateProductInput) {
+    const parsedData = updateProductSchema.parse(data);
+    if (!(await productRepository.findById(id))) {
+      throw new AppError("Product not found.", 404);
+    }
+    if (
+      parsedData.categoryId &&
+      !(await categoryRepository.findById(parsedData.categoryId))
+    ) {
+      throw new AppError("Category not found.", 404);
+    }
+    return productRepository.update(id, parsedData);
+  }
+
   async create(data: CreateProductInput) {
     const parsedData = createProductSchema.parse(data);
 

@@ -4,6 +4,8 @@ import categoryController from "../controllers/category-controller.js";
 
 const router = Router();
 
+router.patch("/:id", ensureAuthenticated, categoryController.update);
+
 router.post("/", ensureAuthenticated, categoryController.create);
 router.get("/", categoryController.findAll);
 

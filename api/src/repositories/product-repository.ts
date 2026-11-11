@@ -1,3 +1,4 @@
+import type { UpdateProductInput } from "../validators/product-validator.js";
 import { prisma } from "../lib/prisma.js";
 
 interface ProductCreateData {
@@ -9,6 +10,21 @@ interface ProductCreateData {
 }
 
 class ProductRepository {
+  async update(id: string, data: UpdateProductInput) {
+    return prisma.product.update({
+      where: { id },
+      data: {
+        ...(data.name !== undefined && { name: data.name }),
+        ...(data.price !== undefined && { price: data.price }),
+        ...(data.categoryId !== undefined && { categoryId: data.categoryId }),
+        ...(data.description !== undefined && {
+          description: data.description,
+        }),
+        ...(data.imageUrl !== undefined && { imageUrl: data.imageUrl }),
+      },
+    });
+  }
+
   async create(data: ProductCreateData) {
     return prisma.product.create({ data });
   }

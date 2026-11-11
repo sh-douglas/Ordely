@@ -26,6 +26,18 @@ const createProductSchema = z.object({
   imageUrl: z.string().trim().url().optional(),
 });
 
+const updateProductSchema = createProductSchema
+  .extend({
+    description: createProductSchema.shape.description.nullable(),
+    imageUrl: createProductSchema.shape.imageUrl.nullable(),
+  })
+  .partial()
+  .refine((data) => Object.keys(data).length > 0, {
+    message: "Provide at least one product field to update.",
+  });
+export { updateProductSchema };
+export type UpdateProductInput = z.infer<typeof updateProductSchema>;
+
 const updateProductAvailableSchema = z.object({
   available: z.boolean(),
 });

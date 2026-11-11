@@ -1,6 +1,10 @@
 import { prisma } from "../lib/prisma.js";
 
 class CategoryRepository {
+  async update(id: string, name: string) {
+    return prisma.category.update({ where: { id }, data: { name } });
+  }
+
   async create(name: string) {
     return prisma.category.create({ data: { name } });
   }
