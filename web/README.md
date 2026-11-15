@@ -1,111 +1,164 @@
 # Ordely Web
 
-Frontend em React + TypeScript, Vite, Tailwind CSS, Zod, React Router e Axios. Usa a API da pasta `../api`; não contém dados fictícios, contas padrão ou backend alternativo.
+Frontend do Ordely em React, TypeScript, Vite, Tailwind CSS, React Router, Zod e Axios. Consome a API da pasta `api` e apresenta os fluxos de cliente, funcionário e administrador de uma única loja.
 
-## Rodar localmente
+Este guia inclui as alterações de **14/11/2026**: páginas restritas por perfil, desativação/reativação de funcionários, exclusão lógica de produtos, tratamento de nome duplicado e dashboard financeiro. A autorização e a unicidade são garantidas pela API/banco; ocultar um botão ou link não substitui essas verificações.
 
-Requisitos: Node 24 e npm 11+. Primeiro configure e inicie o PostgreSQL e a API seguindo o README da raiz.
+## Preparar e iniciar
 
-Dentro de `web`:
+Use Node.js 24.x e npm 11 ou superior. Configure a API, o PostgreSQL, as migrações e o seed do administrador conforme o [README principal](../README.md). Um PostgreSQL já provisionado pode ser usado; Docker é apenas uma opção local.
+
+Dentro de `web`, copie o exemplo se ainda não existir `.env`:
 
 ```sh
 cp .env.example .env
 npm ci
-npm run dev
 ```
 
-Edite `web/.env` para corresponder à porta da API:
+Edite `web/.env` para a URL efetiva da API:
 
 ```dotenv
 VITE_API_URL=http://localhost:5000
 ```
 
-Se `api/.env` usa `PORT=3000`, use `VITE_API_URL=http://localhost:3000`. O arquivo local preparado nesta implementação aponta para 3000, mas o exemplo versionado acompanha o padrão 5000 do README da API.
-
-Em `api/.env`, configure:
+Em `api/.env`, configure a origem do frontend:
 
 ```dotenv
 CORS_ORIGIN=http://localhost:5173
 ```
 
-Abra **http://localhost:5173**. A API também aceita o alias `http://127.0.0.1:5173` quando `CORS_ORIGIN` aponta para localhost, preservando protocolo e porta. Outros domínios continuam exigindo correspondência exata. A porta 5173 é fixa; se estiver ocupada, encerre o outro processo. Reinicie o Vite depois de editar `.env` e a API depois de alterar seu CORS.
+Com a API em execução, inicie o frontend:
 
-As variáveis `VITE_*` são públicas e incorporadas ao build. Nunca coloque JWT_SECRET, senha do banco ou outras credenciais nelas.
+```sh
+npm run dev
+```
 
-## Telas
+Abra `http://localhost:5173`. A configuração usa porta fixa (`strictPort`); se estiver ocupada, o processo falha. A API também aceita `127.0.0.1` como alias de `localhost`, mantendo protocolo e porta. Reinicie os processos ao alterar as variáveis.
 
-| Endereço | Fluxo |
+`VITE_API_URL` é incorporada ao build e é pública. Credenciais do banco, JWT e senha do administrador pertencem à configuração privada da API, nunca a variáveis `VITE_*`. Não há usuário ou senha embutidos no frontend: o primeiro administrador é criado com `npm run db:seed` na pasta `api`.
+
+## Telas e permissões
+
+Equipe ativa significa usuário autenticado com `active=true`, seja funcionário ou administrador.
+
+| Endereço | Acesso | Fluxo |
+| --- | --- | --- |
+| `/` | Público | Cardápio, busca, categorias, sacola e checkout para retirada. |
+| `/acompanhar` | Público | Busca pelo UUID de acompanhamento. |
+| `/acompanhar/:code` | Público | Status, itens, valor e link do pedido. |
+| `/entrar` | Público | Login de funcionário ou administrador ativo. |
+| `/painel` | Equipe ativa | Pedidos ativos, filtros, avanço de etapas e cancelamento. |
+| `/painel/historico` | Equipe ativa | Pedidos concluídos e cancelados. |
+| `/painel/produtos` | Equipe ativa | Cadastro, edição, disponibilidade e exclusão de produtos. |
+| `/painel/categorias` | Equipe ativa | Consulta, cadastro e edição de categorias. |
+| `/painel/equipe` | Admin ativo | Listagem/cadastro e desativação/reativação de funcionários. |
+| `/painel/financeiro` | Admin ativo | Total de vendas concluídas, quantidade de pedidos e vendas diárias com filtro de datas. |
+| Outros endereços | Público | Página 404 com caminhos para voltar à aplicação. |
+
+Sem sessão, o acesso a uma rota protegida encaminha para `/entrar`. Para funcionários, os links Equipe e Financeiro ficam ocultos e o acesso direto retorna a `/painel`. A API aplica os mesmos limites e responde `403` quando uma conta ativa não tem perfil administrativo.
+
+## Operação da equipe
+
+### Funcionários
+
+O administrador acessa **Equipe** para cadastrar usuários com nome, e-mail, senha e confirmação. O cadastro cria sempre `EMPLOYEE`; não há seletor de cargo. A lista mostra perfil e status de acesso.
+
+**Desativar acesso** e **Reativar acesso** pedem confirmação. Uma conta Off/desligada mantém seu cadastro, mas não pode fazer login nem usar a API enquanto estiver inativa. Tokens já emitidos são recusados na próxima requisição autenticada; ao receber `401`, o frontend encerra a sessão. Contas admin não oferecem a ação de desativação e são protegidas também na API.
+
+### Produtos e categorias
+
+Em Produtos, **Novo produto** cria um item disponível. **Editar** permite alterar nome, preço, categoria, descrição e URL da imagem. Descrição/imagem vazias são enviadas como `null` para remover o conteúdo. Preço aceita vírgula e é convertido para string decimal com ponto.
+
+Nomes de produtos são únicos entre todas as categorias, ignorando maiúsculas/minúsculas e diferenças de espaços conforme o índice do banco. Acentos são preservados. A regra também vale na edição e para nomes de produtos já excluídos. Em conflito, a API retorna `409` e a tela apresenta mensagem de duplicidade.
+
+**Excluir** pede confirmação e remove o produto do catálogo/estoque por exclusão lógica. Pedidos antigos permanecem vinculados; o nome continua reservado e não existe restauração pela interface. A chave **Disponível/Indisponível** apenas controla a oferta de produtos não excluídos, sem quantidade de estoque.
+
+Categorias permitem cadastro e edição, com nomes únicos; não há ação de exclusão de categorias. Imagens de produtos usam URLs HTTP(S), sem upload.
+
+### Financeiro
+
+Ao abrir Financeiro, o admin vê todo o período. Pode informar **Data inicial** e **Data final**, clicar em **Filtrar período** ou restaurar a consulta geral com **Todo o período**.
+
+A API soma somente pedidos `COMPLETED`, pelo total gravado e **data de criação do pedido**. Pedidos concluídos depois entram no dia em que foram criados. O filtro inclui os dois dias informados. Intervalos sem vendas mostram zero; a tabela contém somente dias com vendas.
+
+O agrupamento usa `America/Sao_Paulo`; os limites do filtro são calculados em UTC-03 fixo, sem ajuste para períodos históricos de horário de verão. O valor mostrado não é lucro, saldo ou pagamento confirmado; não há cobrança online.
+
+## Comportamento do cliente e contratos
+
+- O cliente consulta o cardápio e envia pedidos sem criar conta. O checkout exige nome com pelo menos três caracteres, celular com DDD e 11 dígitos e forma de pagamento.
+- A sacola fica em memória e é limpa ao sair do cardápio ou recarregar. A interface limita cada produto a 99 unidades; isso não define um limite equivalente na API.
+- A criação envia IDs e quantidades. O backend calcula preços e total com os valores vigentes ao receber o pedido. O total da sacola é estimado; uma mudança de preço não gera uma etapa de reconfirmação.
+- Pix, dinheiro, débito e crédito registram a forma combinada para a retirada; não há integração com gateway.
+- A resposta de criação inclui `trackingCode`. O cliente deve guardar o link; não há busca pública de pedidos por telefone.
+- Acompanhamento e fila ativa consultam a API a cada 10 segundos enquanto a aba está visível. Histórico e financeiro não usam essa atualização periódica. Há botões para atualização/nova tentativa conforme a tela.
+- O aviso de pedido pronto aparece na própria tela de acompanhamento. Não há WebSocket, SMS, WhatsApp ou notificações push.
+- Pedidos seguem recebido → preparo → pronto → concluído. Cancelamento, com confirmação, é permitido apenas em recebido/preparo. Encerrados não reabrem.
+- O histórico usa o preço unitário salvo no pedido, mas consulta o nome atual do produto.
+- O JWT fica em `sessionStorage`, por aba/sessão, e segue no cabeçalho `Authorization: Bearer`. A restauração da sessão consulta `/auth/me`; cada requisição protegida é autorizada pela API.
+- A interface impede envio simultâneo da mesma ação, mas a API não tem idempotência. Se uma resposta de criação se perder, confira com o atendimento antes de reenviar.
+- **Observações/personalizações no pedido ainda não foram implementadas**, embora constem em documentos de requisitos anteriores. Também não há recuperação de senha, troca de perfil na interface ou estoque quantitativo.
+
+## Endpoints usados nas funções adicionadas
+
+| Ação | Requisição |
 | --- | --- |
-| `/` | Cardápio público, busca, categorias, sacola e checkout para retirada. |
-| `/acompanhar` | Busca pelo UUID de acompanhamento. |
-| `/acompanhar/:code` | Situação, itens, valor e link do pedido; consulta a cada 10 segundos enquanto a aba está visível. |
-| `/entrar` | Login dos funcionários. |
-| `/painel` | Pedidos ativos, filtros e transições de status; atualização a cada 10 segundos. |
-| `/painel/historico` | Pedidos concluídos e cancelados. |
-| `/painel/produtos` | Cadastro, edição de preço/dados e alteração de disponibilidade. |
-| `/painel/categorias` | Consulta, cadastro e edição de categorias. |
-| `/painel/equipe` | Listagem e cadastro de funcionários, apenas com sessão autenticada. |
+| Restaurar sessão e identificar perfil | `GET /auth/me`, que retorna `role` e `active` além dos dados públicos. |
+| Listar equipe | `GET /auth/employees` — admin. |
+| Cadastrar funcionário | `POST /auth/signup` — admin; nome, e-mail, senha e confirmação. |
+| Alterar acesso | `PATCH /auth/employees/:id/status` — admin; `{ "active": false }` ou `true`. |
+| Excluir produto | `DELETE /products/:id` — equipe ativa; sucesso `204` sem corpo. |
+| Consultar financeiro | `GET /finance` — admin; opcionalmente `?from=2026-11-14&to=2026-11-15`. |
 
-O primeiro funcionário precisa existir no banco, conforme o procedimento do README da raiz. A API não oferece cadastro inicial público, recuperação de senha ou exclusão de produtos; a interface respeita esses limites.
+O financeiro retorna `total` como string decimal, `count`, `from`, `to` e `daily` com data, quantidade e total por dia. Datas inválidas, intervalo invertido ou filtro com apenas uma das datas são recusados pela API.
 
-## Comportamento e contratos
+Os endpoints existentes de cadastro e edição de produtos (`POST /products`, `PATCH /products/:id`) agora podem responder `409` por nome duplicado. A edição/alteração de disponibilidade de produto excluído é recusada. Os contratos completos estão no [README principal](../README.md#contratos-da-api).
 
-- O JWT fica em `sessionStorage`, por sessão/aba, e segue em `Authorization: Bearer`. Ao receber 401 de uma chamada autenticada, a sessão é encerrada. As rotas protegidas conferem `/auth/me` ao restaurar a sessão. A autorização efetiva continua sendo responsabilidade da API.
-- A sacola fica em memória: sair do cardápio ou recarregar a página a limpa. Quantidades são agrupadas por produto, com limite de 99 unidades por linha na interface.
-- O checkout exige nome, celular com DDD e 11 dígitos e forma de pagamento. A requisição envia IDs e quantidades; o backend calcula os preços e o total. O valor exibido na sacola é estimado.
-- Pix/dinheiro/cartão indicam a forma combinada para pagamento na retirada. Não existe cobrança online ou integração com gateway.
-- A resposta de criação fornece o `trackingCode`. Guarde o link exibido: não há consulta pública por telefone ou listagem dos pedidos de um cliente.
-- O acompanhamento usa polling, sem WebSocket, notificações push ou SMS. Não solicita permissões do navegador.
-- A atualização de pedidos respeita o fluxo do backend: recebido → preparo ou cancelamento; preparo → pronto ou cancelamento; pronto → concluído. Cancelamento pede confirmação.
-- Preços usam strings decimais no cadastro. A interface aceita vírgula e converte para ponto. Valores em reais são formatados com `Intl.NumberFormat`.
-- Imagens são URLs HTTP(S) opcionais; não há upload de arquivos. Produtos sem imagem usam uma ilustração neutra.
-- Erros de conexão, validação, autenticação e negócio têm feedback na tela. Não há envio automático repetido de pedidos: se uma resposta se perder na rede após o servidor aceitar a criação, confira com o atendimento antes de reenviar, pois a API ainda não oferece idempotência.
+## Testes e build
 
-## Validação
+Na pasta `web`:
 
 ```sh
 npm test
 npm run typecheck
 npm run build
-npm audit
 ```
 
-A suíte contém 25 testes com Vitest, Testing Library e jsdom. Confere normalização de dados, valores monetários, contratos Zod, sacola/checkout, login, proteção do painel, pedidos, disponibilidade, cadastros, rastreamento e falhas de conexão. Axios é simulado nesses testes; eles não acessam o banco.
+Na execução registrada em **14/11/2026**, os **30 testes de frontend** passaram. A suíte usa Vitest, Testing Library, jsdom e Axios simulado. Inclui validação de dados, sacola/checkout, login, painel, catálogo, acompanhamento, confirmação de exclusão/desativação, bloqueio de páginas administrativas e filtros do financeiro.
 
-Em uma validação anterior, registrada neste guia, foi validado no navegador um fluxo real com API e PostgreSQL descartáveis: cardápio → criação de pedido → acompanhamento → login → preparo → pronto → retirada → histórico. Os dados e o banco de teste foram removidos. Layouts público e administrativo foram inspecionados em desktop e viewport reduzida.
+A validação conjunta daquela revisão somou **108 testes**: 30 de frontend, 77 de API/repositório e 1 integrado ao PostgreSQL. As suítes da API são executadas em `api` com `npm test` e `npm run test:db`. O teste integrado não faz parte de `npm test` do frontend.
 
-`npm run format` formata os arquivos do frontend. `npm run build` produz `dist`. Para inspecionar o build, use `npm run preview`; autorize a origem da porta de preview no CORS da API durante esse teste.
+Os builds passaram e houve conferência no navegador local do login do admin, navegação Equipe/Financeiro e layout financeiro em viewport de celular. Isso não comprova homologação da versão hospedada ou teste de usabilidade com participantes.
+
+`npm run format` formata o código do frontend. `npm run build` gera `dist`; `npm run preview` permite inspecionar esse build, com a origem correspondente autorizada no CORS da API.
 
 ## Estrutura
 
+- `src/App.tsx`: rotas, layouts e links conforme perfil.
+- `src/lib/auth.tsx`: sessão e proteção de páginas, inclusive administrador.
 - `src/lib/api.ts`: cliente Axios, token e mensagens de erro.
-- `src/lib/auth.tsx`: estado da sessão e proteção de rotas.
-- `src/lib/domain.ts`: contratos, validadores, tipos e formatação.
-- `src/lib/hooks.ts`: carregamento/cancelamento, polling e proteção contra envios simultâneos.
-- `src/components`: componentes de interface compartilhados.
-- `src/pages`: telas públicas e administrativas.
-- `src/styles.css`: Tailwind e estilos da identidade visual responsiva.
+- `src/lib/domain.ts`: tipos, validadores e formatação.
+- `src/lib/hooks.ts`: consultas, polling e controle de ações.
+- `src/pages/Management.tsx`: categorias e equipe.
+- `src/pages/Inventory.tsx`: produtos, disponibilidade e exclusão.
+- `src/pages/Finance.tsx`: consulta financeira e filtro por período.
+- `src/pages/Menu.tsx`, `Tracking.tsx`, `Orders.tsx`, `Login.tsx`, `NotFound.tsx`: demais fluxos.
+- `src/components/` e `src/styles.css`: componentes e estilos compartilhados.
 
-## Hospedagem
+## Publicação e compatibilidade com a API
 
-O frontend é uma SPA. Configure fallback de todas as rotas para `index.html`, defina `VITE_API_URL` antes do build e autorize a origem HTTPS do frontend no CORS do backend. Esta implementação não publica, não executa push e não provisiona hospedagem.
+O frontend é uma SPA. Na Vercel, configure Root Directory `web`, build `npm run build`, saída `dist` e `VITE_API_URL` com a URL pública da API. Autorize a origem em `CORS_ORIGIN` na API. O arquivo `vercel.json` mantém o fallback para abrir links diretos do React.
 
-### Publicação na Vercel
+A versão atual exige a API com RBAC/financeiro/exclusão e a migração `20261114190000_rbac_finance_products` aplicada. Prepare o banco, crie o administrador com seed e publique/reinicie a API antes de validar o frontend atualizado. **Publicar somente a interface não disponibiliza essas funções.**
 
-Configure o projeto da Vercel com **Root Directory: `web`**, preset Vite,
-comando `npm run build` e saída `dist`. Defina `VITE_API_URL` com a URL pública
-da API. O arquivo `web/vercel.json` encaminha as rotas do React para
-`index.html`, permitindo abrir ou atualizar `/acompanhar/:code` e `/painel`
-diretamente no navegador. A configuração só entra em vigor após novo deploy.
+Após o deploy, confira login de admin e funcionário, bloqueios por perfil, desativação, nome duplicado, exclusão, financeiro e o fluxo completo de pedido. Registre as revisões de API/frontend e o ambiente usado.
 
-A edição de produtos e categorias e a lista da equipe dependem também da
-publicação da API atualizada. Não há migração de banco para estas alterações.
-As novas rotas autenticadas são `GET /auth/employees`, `PATCH /products/:id`
-e `PATCH /categories/:id`. Na edição de produto, `description` e `imageUrl`
-aceitam `null` para remover os valores; campos omitidos são preservados.
+A página 404 visual da SPA pode responder HTTP 200 pelo fallback; os erros HTTP da API são independentes.
 
-### Página 404 e relatório de testes
+## Documentação
 
-Endereços não reconhecidos exibem uma página própria com cabeçalho e rodapé, links para cardápio, acompanhamento e login. A rota curinga também cobre caminhos desconhecidos dentro de `/painel`. Como a aplicação é uma SPA, essa tela não muda o status HTTP do documento servido pela Vercel (o fallback pode responder 200). Erros da API continuam usando os seus próprios status HTTP.
+- [Instalação, regras e contratos completos](../README.md).
+- [Implementação de 14/11/2026](../docs/implementacao-rbac-financeiro-2026-11-14.md).
+- [Plano de testes atualizado](../docs/plano-de-testes-2026-11-14.md).
+- [Relatório histórico de 11/11/2026](../docs/alteracoes-e-testes-2026-11-11.md): mantém os resultados da versão anterior, sem substituir as regras atuais.
 
-A validação desta atualização foi automatizada, sem banco real nem teste no domínio de produção. Consulte o [relatório de alterações e testes](../docs/alteracoes-e-testes-2026-11-11.md) e o [PDF](../output/pdf/ordely-alteracoes-e-testes-2026-11-11.pdf).
+PDFs em `output/pdf/` são entregáveis locais ignorados pelo Git; use os documentos Markdown versionados para consulta em um clone novo.
