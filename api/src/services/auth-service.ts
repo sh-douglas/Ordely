@@ -14,13 +14,17 @@ import { env } from "../config/env.js";
 class AuthService {
   async findAll() {
     const employees = await employeeRepository.findAll();
-    return employees.map(({ id, name, email, createdAt, updatedAt }) => ({
-      id,
-      name,
-      email,
-      createdAt,
-      updatedAt,
-    }));
+    return employees.map(
+      ({ id, name, email, role, active, createdAt, updatedAt }) => ({
+        id,
+        name,
+        email,
+        role,
+        active,
+        createdAt,
+        updatedAt,
+      }),
+    );
   }
 
   async signUp(data: SignUpInput) {
@@ -48,6 +52,8 @@ class AuthService {
       id: employee.id,
       name: employee.name,
       email: employee.email,
+      role: employee.role,
+      active: employee.active,
       createdAt: employee.createdAt,
       updatedAt: employee.updatedAt,
     };
@@ -59,7 +65,7 @@ class AuthService {
     const parsedData = signInSchema.parse(data);
     const employee = await employeeRepository.findByEmail(parsedData.email);
 
-    if (!employee) {
+    if (!employee || !employee.active) {
       throw new AppError("Invalid credentials.", 401);
     }
 
@@ -80,6 +86,8 @@ class AuthService {
       id: employee.id,
       name: employee.name,
       email: employee.email,
+      role: employee.role,
+      active: employee.active,
     };
 
     return {
@@ -99,6 +107,8 @@ class AuthService {
       id: employee.id,
       name: employee.name,
       email: employee.email,
+      role: employee.role,
+      active: employee.active,
       createdAt: employee.createdAt,
       updatedAt: employee.updatedAt,
     };

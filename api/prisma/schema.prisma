@@ -10,6 +10,7 @@ datasource db {
 model Product {
   id          String      @id @default(uuid()) @db.Uuid
   name        String
+  deletedAt   DateTime?
   description String?
   price       Decimal     @db.Decimal(10, 2)
   available   Boolean     @default(true)
@@ -40,6 +41,8 @@ model Employee {
   id           String   @id @default(uuid()) @db.Uuid
   name         String
   email        String   @unique
+  role         EmployeeRole @default(EMPLOYEE)
+  active       Boolean      @default(true)
   passwordHash String
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -60,6 +63,7 @@ model Order {
 
   orderItems OrderItem[]
 
+  @@index([status, createdAt])
   @@map("orders")
 }
 
@@ -89,4 +93,9 @@ enum PaymentMethod {
   CASH
   DEBIT_CARD
   CREDIT_CARD
+}
+
+enum EmployeeRole {
+  ADMIN
+  EMPLOYEE
 }

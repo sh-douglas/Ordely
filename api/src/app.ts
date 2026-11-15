@@ -13,6 +13,9 @@ import { env } from "./config/env.js";
 import AppError from "./errors/app-error.js";
 import { allowedOrigins } from "./config/cors.js";
 
+import ensureAuthenticated from "./middlewares/ensure-authenticated.js";
+import ensureAdmin from "./middlewares/ensure-admin.js";
+import financeSummary from "./services/finance-service.js";
 const app = express();
 
 const origins = allowedOrigins(env.CORS_ORIGIN);
@@ -41,6 +44,9 @@ app.use("/orders", orderRoutes);
 app.use("/products", productRoutes);
 app.use("/categories", categoryRoutes);
 app.use("/auth", authRoutes);
+app.get("/finance", ensureAuthenticated, ensureAdmin, async (req, res) => {
+  res.json(await financeSummary(req.query));
+});
 
 app.use(notFound);
 app.use(errorHandler);

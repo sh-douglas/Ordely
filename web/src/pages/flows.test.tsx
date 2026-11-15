@@ -8,6 +8,8 @@ import Menu from "./Menu";
 import Orders from "./Orders";
 import Tracking from "./Tracking";
 import Login from "./Login";
+import Finance from "./Finance";
+import App from "../App";
 import Inventory from "./Inventory";
 import { Categories, Team } from "./Management";
 const id = "a011a0d5-1ac1-4df0-a1d0-000000000002";
@@ -38,7 +40,15 @@ beforeEach(() => {
   vi.spyOn(api, "get").mockImplementation(async (path) => ({
     data:
       path === "/auth/employees"
-        ? [{ id, name: "Funcionário", email: "a@example.com" }]
+        ? [
+            {
+              id,
+              role: "EMPLOYEE",
+              active: true,
+              name: "Funcionário",
+              email: "a@example.com",
+            },
+          ]
         : path === "/categories"
           ? [category]
           : path === "/products/menu" || path === "/products/inventory"
@@ -49,7 +59,13 @@ beforeEach(() => {
                 ? []
                 : path.startsWith("/orders/track/")
                   ? order
-                  : { id, name: "Funcionário", email: "a@example.com" },
+                  : {
+                      id,
+                      role: "EMPLOYEE",
+                      active: true,
+                      name: "Funcionário",
+                      email: "a@example.com",
+                    },
   }));
   vi.spyOn(api, "post").mockResolvedValue({
     data: { id: 1, trackingCode: id },
@@ -304,5 +320,84 @@ it("edita uma categoria existente", async () => {
 it("lista funcionários cadastrados", async () => {
   wrap(<Team />);
   expect(await screen.findByText("a@example.com")).toBeInTheDocument();
-  expect(screen.getByText("Funcionário")).toBeInTheDocument();
+  expect(
+    screen.getByRole("heading", { name: "Funcionário" }),
+  ).toBeInTheDocument();
+});
+
+it("confirma exclusão de produto e permite cancelar", async () => {
+  const user = userEvent.setup();
+  const remove = vi.spyOn(api, "delete").mockResolvedValue({});
+  const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
+  wrap(<Inventory />);
+  const button = await screen.findByRole("button", {
+    name: "Excluir Sanduíche da casa",
+  });
+  await user.click(button);
+  expect(remove).not.toHaveBeenCalled();
+  confirm.mockReturnValue(true);
+  await user.click(button);
+  await waitFor(() => expect(remove).toHaveBeenCalledWith(`/products/${id}`));
+});
+it("desativa funcionário com confirmação", async () => {
+  vi.spyOn(window, "confirm").mockReturnValue(true);
+  const user = userEvent.setup();
+  wrap(<Team />);
+  await user.click(
+    await screen.findByRole("button", { name: "Desativar acesso" }),
+  );
+  expect(api.patch).toHaveBeenCalledWith(`/auth/employees/${id}/status`, {
+    active: false,
+  });
+});
+for (const path of ["/painel/equipe", "/painel/financeiro"]) {
+  it(`bloqueia acesso direto de funcionário a ${path} e oculta links`, async () => {
+    setToken("employee-token");
+    render(
+      <MemoryRouter initialEntries={[path]}>
+        <AuthProvider>
+          <App />
+          <Location />
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+    expect(await screen.findByText("/painel")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "Equipe" }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "Financeiro" }),
+    ).not.toBeInTheDocument();
+    expect(api.get).not.toHaveBeenCalledWith(
+      path === "/painel/equipe" ? "/auth/employees" : "/finance",
+      expect.anything(),
+    );
+  });
+}
+it("financeiro mostra total, filtra datas e informa período vazio", async () => {
+  const user = userEvent.setup();
+  vi.mocked(api.get).mockImplementation(async (path) => ({
+    data:
+      path === "/finance"
+        ? {
+            total: "30.30",
+            count: 2,
+            daily: [{ date: "2026-11-14", count: 2, total: "30.30" }],
+          }
+        : { total: "0.00", count: 0, daily: [] },
+  }));
+  wrap(<Finance />);
+  expect(await screen.findByText("14/11/2026")).toBeInTheDocument();
+  await user.type(screen.getByLabelText("Data inicial"), "2026-11-14");
+  await user.type(screen.getByLabelText("Data final"), "2026-11-15");
+  await user.click(screen.getByRole("button", { name: "Filtrar período" }));
+  await waitFor(() =>
+    expect(api.get).toHaveBeenCalledWith(
+      "/finance?from=2026-11-14&to=2026-11-15",
+      expect.anything(),
+    ),
+  );
+  expect(
+    await screen.findByText("Nenhuma venda no período"),
+  ).toBeInTheDocument();
 });

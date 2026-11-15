@@ -191,6 +191,30 @@ export default function Inventory() {
               <strong>{money(p.price)}</strong>
               <button
                 className="btn secondary"
+                disabled={action.busy}
+                aria-label={`Excluir ${p.name}`}
+                onClick={() => {
+                  if (
+                    !window.confirm(
+                      `Excluir ${p.name} do catálogo? O histórico dos pedidos será preservado e o nome continuará reservado.`,
+                    )
+                  )
+                    return;
+                  void action.run(async () => {
+                    await api.delete(`/products/${p.id}`);
+                    if (editing?.id === p.id) {
+                      setEditing(null);
+                      setOpen(false);
+                    }
+                    products.refresh();
+                    action.setSuccess("Produto excluído do catálogo.");
+                  });
+                }}
+              >
+                Excluir
+              </button>
+              <button
+                className="btn secondary"
                 disabled={creation.busy}
                 aria-label={`Editar ${p.name}`}
                 onClick={() => {

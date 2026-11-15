@@ -13,10 +13,20 @@ class EmployeeRepository {
         id: true,
         name: true,
         email: true,
+        role: true,
+        active: true,
         createdAt: true,
         updatedAt: true,
       },
       orderBy: [{ name: "asc" }, { id: "asc" }],
+    });
+  }
+
+  async setActive(id: string, active: boolean) {
+    return prisma.employee.update({
+      where: { id },
+      data: { active },
+      select: { id: true, name: true, email: true, role: true, active: true },
     });
   }
 

@@ -28,11 +28,13 @@
     "dev": "tsx watch src/server.ts",
     "predev": "npm run db:generate",
     "db:generate": "prisma generate",
+    "db:seed": "prisma db seed",
     "db:migrate": "prisma migrate deploy",
     "db:check": "tsx src/lib/check-connection.ts",
     "typecheck": "npm run db:generate && tsc --noEmit",
     "build": "npm run db:generate && tsc",
     "start": "node dist/server.js",
+    "test:db": "npm run db:generate && node --import tsx --test tests/database.integration.mjs",
     "test": "npm run db:generate && node --import tsx --test tests/*.test.mjs"
   },
   "devDependencies": {

@@ -16,6 +16,7 @@ import NotFound from "./pages/NotFound";
 import Tracking from "./pages/Tracking";
 import Login from "./pages/Login";
 import Orders from "./pages/Orders";
+import Finance from "./pages/Finance";
 import Inventory from "./pages/Inventory";
 import { Categories, Team } from "./pages/Management";
 function PublicLayout() {
@@ -54,6 +55,7 @@ function AdminLayout() {
     ["/painel/produtos", "Produtos", LayoutGrid],
     ["/painel/categorias", "Categorias", Tags],
     ["/painel/equipe", "Equipe", Users],
+    ["/painel/financeiro", "Financeiro", History],
   ] as const;
   return (
     <div className="admin-shell">
@@ -61,12 +63,18 @@ function AdminLayout() {
         <Brand />
         <p className="sidebar-caption">ÁREA DA EQUIPE</p>
         <nav aria-label="Painel da equipe">
-          {links.map(([to, label, Icon]) => (
-            <NavLink to={to} end key={to}>
-              <Icon size={19} />
-              {label}
-            </NavLink>
-          ))}
+          {links
+            .filter(
+              ([to]) =>
+                employee?.role === "ADMIN" ||
+                !["/painel/equipe", "/painel/financeiro"].includes(to),
+            )
+            .map(([to, label, Icon]) => (
+              <NavLink to={to} end key={to}>
+                <Icon size={19} />
+                {label}
+              </NavLink>
+            ))}
         </nav>
         <div className="sidebar-bottom">
           <Link to="/" className="menu-shortcut">
@@ -126,7 +134,22 @@ export default function App() {
         <Route path="historico" element={<Orders key="history" history />} />
         <Route path="produtos" element={<Inventory />} />
         <Route path="categorias" element={<Categories />} />
-        <Route path="equipe" element={<Team />} />
+        <Route
+          path="equipe"
+          element={
+            <Protected admin>
+              <Team />
+            </Protected>
+          }
+        />
+        <Route
+          path="financeiro"
+          element={
+            <Protected admin>
+              <Finance />
+            </Protected>
+          }
+        />
       </Route>
       <Route element={<PublicLayout />}>
         <Route path="*" element={<NotFound />} />

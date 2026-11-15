@@ -2,7 +2,13 @@ import { Router } from "express";
 import productController from "../controllers/product-controller.js";
 import ensureAuthenticated from "../middlewares/ensure-authenticated.js";
 
+import { productIdSchema } from "../validators/params-validator.js";
+import productRepository from "../repositories/product-repository.js";
 const router = Router();
+router.delete("/:id", ensureAuthenticated, async (req, res) => {
+  await productRepository.remove(productIdSchema.parse(req.params.id));
+  res.status(204).end();
+});
 
 router.patch("/:id", ensureAuthenticated, productController.update);
 

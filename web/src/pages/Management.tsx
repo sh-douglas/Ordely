@@ -203,6 +203,38 @@ export function Team() {
                 <li key={employee.id}>
                   <h3>{employee.name}</h3>
                   <p>{employee.email}</p>
+                  <p>
+                    {employee.role === "ADMIN"
+                      ? "Administrador"
+                      : "Funcionário"}{" "}
+                    · {employee.active ? "Ativo" : "Off / desligado"}
+                  </p>
+                  {employee.role !== "ADMIN" && (
+                    <button
+                      className="btn secondary"
+                      disabled={action.busy}
+                      onClick={() => {
+                        if (
+                          !window.confirm(
+                            `${employee.active ? "Desativar" : "Reativar"} o acesso de ${employee.name}?`,
+                          )
+                        )
+                          return;
+                        void action.run(async () => {
+                          await api.patch(
+                            `/auth/employees/${employee.id}/status`,
+                            { active: !employee.active },
+                          );
+                          employees.refresh();
+                          action.setSuccess(
+                            "Status do funcionário atualizado.",
+                          );
+                        });
+                      }}
+                    >
+                      {employee.active ? "Desativar acesso" : "Reativar acesso"}
+                    </button>
+                  )}
                 </li>
               ))}
             </ul>

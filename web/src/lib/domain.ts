@@ -10,7 +10,13 @@ export type Product = {
   categoryId: string;
   category?: Category;
 };
-export type Employee = { id: string; name: string; email: string };
+export type Employee = {
+  id: string;
+  name: string;
+  email: string;
+  role: "ADMIN" | "EMPLOYEE";
+  active: boolean;
+};
 export const statuses = [
   "PENDING",
   "IN_PROGRESS",

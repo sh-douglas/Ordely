@@ -32,6 +32,11 @@ api.interceptors.response.use(
   },
 );
 const messages: Record<string, string> = {
+  "Administrator access required.": "Acesso restrito ao administrador.",
+  "Administrator accounts cannot be deactivated here.":
+    "Contas de administrador não podem ser desativadas aqui.",
+  "A record with these unique fields already exists.":
+    "Nome ou e-mail já cadastrado. Nomes de produtos excluídos continuam reservados.",
   "Invalid credentials.": "E-mail ou senha incorretos.",
   "Invalid or expired token.": "Sua sessão expirou. Entre novamente.",
   "Unauthorized.": "Entre na sua conta para continuar.",

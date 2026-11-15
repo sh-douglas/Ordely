@@ -287,3 +287,18 @@ Para reproduzir, execute `npm test` e `npm run build` em cada pasta (`web` e `ap
 
 - [Relatório de alterações e testes pela visão do usuário](docs/alteracoes-e-testes-2026-11-11.md)
 - [Relatório em PDF](output/pdf/ordely-alteracoes-e-testes-2026-11-11.pdf)
+
+
+## Atualização de 14/11/2026: RBAC, catálogo e financeiro
+
+A equipe e o financeiro são restritos ao perfil ADMIN na interface e API. O seed cria o administrador; os cadastros normais recebem EMPLOYEE. Desativar um funcionário revoga o acesso inclusive com token existente. Administradores não podem ser desativados nessa interface.
+
+Produtos têm nomes únicos no PostgreSQL, ignorando maiúsculas e espaços repetidos. A exclusão é lógica, preserva pedidos e mantém o nome reservado. Funcionários ativos continuam operando pedidos, produtos e categorias.
+
+O financeiro considera somente pedidos COMPLETED, pelo valor gravado e data de criação, agrupada em America/Sao_Paulo. Filtros incluem início e fim, usando UTC-03. Esta versão considera uma única loja por banco; não inclui conciliação ou lucro.
+
+Na pasta `api`, execute `npm run db:migrate` e `npm run db:seed`. Para criar o admin, configure ADMIN_PASSWORD com pelo menos 12 caracteres; ADMIN_EMAIL e ADMIN_NAME são opcionais. A repetição do seed preserva senhas e não promove contas existentes. O índice de nome normalizado é definido na migração SQL e deve ser preservado.
+
+Validação: `npm test` nas pastas `api` e `web`; `npm run test:db` na pasta `api` executa o teste integrado no banco conectado, revertendo os registros temporários (sequências podem avançar). `npm run build` verifica e compila cada aplicação.
+
+Documentação: [implementação](docs/implementacao-rbac-financeiro-2026-11-14.md) e [plano de testes](docs/plano-de-testes-2026-11-14.md). PDFs correspondentes em `output/pdf/`.

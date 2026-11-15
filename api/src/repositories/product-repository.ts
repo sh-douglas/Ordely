@@ -10,9 +10,15 @@ interface ProductCreateData {
 }
 
 class ProductRepository {
+  async remove(id: string) {
+    return prisma.product.update({
+      where: { id, deletedAt: null },
+      data: { deletedAt: new Date(), available: false },
+    });
+  }
   async update(id: string, data: UpdateProductInput) {
     return prisma.product.update({
-      where: { id },
+      where: { id, deletedAt: null },
       data: {
         ...(data.name !== undefined && { name: data.name }),
         ...(data.price !== undefined && { price: data.price }),
@@ -41,18 +47,19 @@ class ProductRepository {
           name: "asc",
         },
       ],
-      where: { available: true },
+      where: { available: true, deletedAt: null },
       include: { category: true },
     });
   }
 
   async findAll() {
-    return prisma.product.findMany();
+    return prisma.product.findMany({ where: { deletedAt: null } });
   }
 
   async findByIds(productIds: string[]) {
     return prisma.product.findMany({
       where: {
+        deletedAt: null,
         id: {
           in: productIds,
         },
@@ -62,7 +69,7 @@ class ProductRepository {
 
   async updateAvailability(id: string, available: boolean) {
     return prisma.product.update({
-      where: { id },
+      where: { id, deletedAt: null },
       data: {
         available,
       },
@@ -70,7 +77,7 @@ class ProductRepository {
   }
 
   async findById(id: string) {
-    return prisma.product.findUnique({ where: { id } });
+    return prisma.product.findUnique({ where: { id, deletedAt: null } });
   }
 }
 

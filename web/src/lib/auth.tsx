@@ -58,7 +58,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 export const useAuth = () => useContext(Context);
-export function Protected({ children }: { children: ReactNode }) {
+export function Protected({
+  children,
+  admin = false,
+}: {
+  children: ReactNode;
+  admin?: boolean;
+}) {
   const { employee, loading } = useAuth();
   const location = useLocation();
   if (loading)
@@ -71,5 +77,7 @@ export function Protected({ children }: { children: ReactNode }) {
     return (
       <Navigate to="/entrar" replace state={{ from: location.pathname }} />
     );
+  if (admin && employee.role !== "ADMIN")
+    return <Navigate to="/painel" replace />;
   return children;
 }

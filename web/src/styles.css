@@ -1460,3 +1460,18 @@ select:focus {
   gap: 12px;
   margin: 30px 0 24px;
 }
+
+.finance-table {
+  width: 100%;
+  margin-top: 1rem;
+  border-collapse: collapse;
+}
+.finance-table th,
+.finance-table td {
+  text-align: left;
+  padding: 0.8rem 0.4rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+.inventory-row {
+  flex-wrap: wrap;
+}

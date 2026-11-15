@@ -48,12 +48,13 @@ export default async function ensureAuthenticated(
 
   const employee = await EmployeeRepository.findById(sub);
 
-  if (!employee) {
+  if (!employee || !employee.active) {
     next(new AppError("Invalid or expired token.", 401));
     return;
   }
 
   req.employeeId = employee.id;
+  req.employeeRole = employee.role;
 
   next();
 }
